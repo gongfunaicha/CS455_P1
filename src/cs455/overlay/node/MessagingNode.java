@@ -43,11 +43,12 @@ public class MessagingNode implements Node {
             System.exit(1);
         }
 
-        // TODO: Start TCPServerThread, get information and prepare to connect to registry.
         // Set portnum = 0 to make java select an available port freely
         messagingNodeServerThread = new TCPServerThread(this, 0);
         messagingNodeServerThread.start();
         System.out.println("Messaging node is now exiting.");
+
+        // TODO: prepare to connect to registry.
     }
 
     public static void main(String[] args)

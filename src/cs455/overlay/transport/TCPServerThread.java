@@ -44,4 +44,19 @@ public class TCPServerThread extends Thread {
         System.out.println("Node is now listening on IP: " + HostIP + " Port: " + port);
         //TODO: Accept incoming connections and handle them
     }
+
+    public String getHostIP()
+    {
+        return HostIP;
+    }
+
+    public int getPort()
+    {
+        return port;
+    }
+
+    public ServerSocket getServerSocket()
+    {
+        return serverSocket;
+    }
 }
