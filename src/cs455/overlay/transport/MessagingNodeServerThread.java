@@ -1,46 +1,44 @@
 package cs455.overlay.transport;
 
-import cs455.overlay.node.Registry;
+import cs455.overlay.node.MessagingNode;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
-public class RegistryServerThread extends Thread {
-
+public class MessagingNodeServerThread extends Thread{
     private ServerSocket serverSocket = null;
     private String HostIP = null;
     private int port = 0;
-    private Registry registry;
+    private MessagingNode messagingNode = null;
 
-    public RegistryServerThread(Registry reg, int portnum)
+    public MessagingNodeServerThread(MessagingNode msgNode)
     {
-        this.registry = reg;
-        this.port = portnum;
+        this.messagingNode = msgNode;
     }
 
-    public void run()
-    {
+    @Override
+    public void run() {
         // Get current host IP
         try {
             HostIP = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            System.out.println("Unable to obtain host address.");
-            HostIP = "Unknown";
+            System.out.println("Unable to obtain host address. Program will now exit");
+            System.exit(1);
         }
-        // Try to bind to specified port
+        // Try to bind to an available port
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(0);
         } catch (IOException e) {
-            System.out.println("Unable to bind to specified port. Program will now exit.");
+            System.out.println("Unable to bind to an available port. Program will now exit.");
             System.exit(1);
         }
 
         // assign port to the real port number
         port = serverSocket.getLocalPort();
 
-        System.out.println("Registry is now listening on IP: " + HostIP + " Port: " + port);
+        System.out.println("Messaging node is now listening on IP: " + HostIP + " Port: " + port);
         //TODO: Accept incoming connections and handle them
     }
 }
