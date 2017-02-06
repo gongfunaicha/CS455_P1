@@ -8,8 +8,9 @@ public class Registry implements Node {
 
     public Registry(int portnum)
     {
-        registryServerThread = new TCPServerThread(this, portnum);
-        registryServerThread.start();
+        // Start registry server thread
+        startRegistryServerThread(portnum);
+
         System.out.println("Registry is now exiting.");
     }
 
@@ -47,5 +48,11 @@ public class Registry implements Node {
     @Override
     public void onEvent(Event e) {
         //TODO: What to do on onEvent?
+    }
+
+    private void startRegistryServerThread(int portnum)
+    {
+        registryServerThread = new TCPServerThread(this, portnum);
+        registryServerThread.start();
     }
 }

@@ -3,6 +3,7 @@ package cs455.overlay.node;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.wireformats.Event;
+import cs455.overlay.wireformats.RegisterRequest;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -21,47 +22,19 @@ public class MessagingNode implements Node {
 
     public MessagingNode(String[] args)
     {
-        // Check hostname
-        if (!validateIP(args[0]))
-        {
-            System.out.println("Error: Inputted IP not valid. Please check the registry-host. Program will now exit.");
-            System.exit(1);
-        }
+        // Check arguments, exit on fail
+        checkArguments(args);
 
-        registry_host = args[0];
+        // Start messaging node server thread
+        startMessagingNodeServerThread();
 
-        // Check port number
-        try
-        {
-            registry_port = Integer.parseInt(args[1]);
-        }
-        catch (NumberFormatException e)
-        {
-            System.out.println("Error: Inputted port number not int. Please check the registry-port. Program will now exit.");
-            System.exit(1);
-        }
+        // Connect registry
+        connectRegistry();
 
-        // Check port number between 0 and 65535
-        if (registry_port < 0 || registry_port > 65535)
-        {
-            System.out.println("Error: Invalid port number. Port number should be between 0 and 65535. Program will now exit.");
-            System.exit(1);
-        }
+        // Send register request
+        sendRegisterRequest();
 
-        // Set portnum = 0 to make java select an available port freely
-        messagingNodeServerThread = new TCPServerThread(this, 0);
-        messagingNodeServerThread.start();
-
-        // Connect to registry and create registrySender
-        try {
-            Socket registrySocket = new Socket(registry_host, registry_port);
-            registrySender = new TCPSender(registrySocket);
-        } catch (IOException e) {
-            System.out.println("Unable to connect to registry. Program will now exit");
-            System.exit(1);
-        }
-
-
+        // TODO: Waiting for user input?
 
         System.out.println("Messaging node is now exiting.");
     }
@@ -111,5 +84,68 @@ public class MessagingNode implements Node {
 
         // All passed, is valid IP
         return true;
+    }
+
+    private void checkArguments(String[] args)
+    {
+        // Check hostname
+        if (!validateIP(args[0]))
+        {
+            System.out.println("Error: Inputted IP not valid. Please check the registry-host. Program will now exit.");
+            System.exit(1);
+        }
+
+        registry_host = args[0];
+
+        // Check port number
+        try
+        {
+            registry_port = Integer.parseInt(args[1]);
+        }
+        catch (NumberFormatException e)
+        {
+            System.out.println("Error: Inputted port number not int. Please check the registry-port. Program will now exit.");
+            System.exit(1);
+        }
+
+        // Check port number between 0 and 65535
+        if (registry_port < 0 || registry_port > 65535)
+        {
+            System.out.println("Error: Invalid port number. Port number should be between 0 and 65535. Program will now exit.");
+            System.exit(1);
+        }
+    }
+
+    private void startMessagingNodeServerThread()
+    {
+        // Set portnum = 0 to make java select an available port freely
+        messagingNodeServerThread = new TCPServerThread(this, 0);
+        messagingNodeServerThread.start();
+    }
+
+    private void connectRegistry()
+    {
+        // Connect to registry and create registrySender
+        try {
+            Socket registrySocket = new Socket(registry_host, registry_port);
+            registrySender = new TCPSender(registrySocket);
+        } catch (IOException e) {
+            System.out.println("Unable to connect to registry. Program will now exit");
+            System.exit(1);
+        }
+    }
+
+    private void sendRegisterRequest()
+    {
+        // Send register request to the registry
+        RegisterRequest registerRequest = new RegisterRequest(registry_host, registry_port);
+        try {
+            registrySender.sendData(registerRequest.getBytes());
+        }
+        catch (IOException e)
+        {
+            System.out.println("Unable to send register request to registry. Program will now exit");
+            System.exit(1);
+        }
     }
 }
