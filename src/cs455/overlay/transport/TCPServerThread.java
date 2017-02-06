@@ -42,7 +42,8 @@ public class TCPServerThread extends Thread {
         port = serverSocket.getLocalPort();
 
         System.out.println("Node is now listening on IP: " + HostIP + " Port: " + port);
-        //TODO: Accept incoming connections and handle them
+
+        // TODO: Continuously accept incoming connection and spawn TCP Receiver Thread
     }
 
     public String getHostIP()

@@ -11,6 +11,7 @@ public class Registry implements Node {
         // Start registry server thread
         startRegistryServerThread(portnum);
 
+        // TODO: Registry next steps
         System.out.println("Registry is now exiting.");
     }
 
@@ -36,7 +37,6 @@ public class Registry implements Node {
             }
             // Check passed through, create registry instance
             Registry registry = new Registry(port);
-            // TODO: Registry next steps
         }
         else
         {
