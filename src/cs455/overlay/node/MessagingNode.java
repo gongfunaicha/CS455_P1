@@ -1,11 +1,13 @@
 package cs455.overlay.node;
 
+import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.wireformats.Event;
 
 public class MessagingNode implements Node {
 
     private String registry_host;
     private int registry_port;
+    private TCPServerThread messagingNodeServerThread = null;
 
     @Override
     public void onEvent(Event e) {
@@ -42,6 +44,10 @@ public class MessagingNode implements Node {
         }
 
         // TODO: Start TCPServerThread, get information and prepare to connect to registry.
+        // Set portnum = 0 to make java select an available port freely
+        messagingNodeServerThread = new TCPServerThread(this, 0);
+        messagingNodeServerThread.start();
+        System.out.println("Messaging node is now exiting.");
     }
 
     public static void main(String[] args)
@@ -64,7 +70,7 @@ public class MessagingNode implements Node {
     private boolean validateIP(String IP)
     {
         // Cut based on "."
-        String[] splitted = IP.split(".");
+        String[] splitted = IP.split("\\.");
 
         // If not four parts, not a valid IP
         if (splitted.length != 4)

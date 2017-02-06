@@ -1,14 +1,16 @@
 package cs455.overlay.node;
-import cs455.overlay.transport.RegistryServerThread;
+import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.wireformats.Event;
 
 public class Registry implements Node {
 
+    private TCPServerThread registryServerThread = null;
+
     public Registry(int portnum)
     {
-        RegistryServerThread registryServerThread = new RegistryServerThread(this, portnum);
+        registryServerThread = new TCPServerThread(this, portnum);
         registryServerThread.start();
-        System.out.println("Program is now exiting.");
+        System.out.println("Registry is now exiting.");
     }
 
     public static void main(String[] args)
