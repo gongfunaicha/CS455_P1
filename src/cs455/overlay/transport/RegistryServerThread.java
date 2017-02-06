@@ -7,16 +7,17 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
-public class TCPServerThread extends Thread {
+public class RegistryServerThread extends Thread {
 
     private ServerSocket serverSocket = null;
     private String HostIP = null;
     private int port = 0;
     private Registry registry;
 
-    public TCPServerThread(Registry reg)
+    public RegistryServerThread(Registry reg, int portnum)
     {
         this.registry = reg;
+        this.port = portnum;
     }
 
     public void run()
@@ -30,9 +31,9 @@ public class TCPServerThread extends Thread {
         }
         // Try to bind to an available port
         try {
-            serverSocket = new ServerSocket(0);
+            serverSocket = new ServerSocket(port);
         } catch (IOException e) {
-            System.out.println("Unable to bind to an available port. Program will now exit.");
+            System.out.println("Unable to bind to specified port. Program will now exit.");
             System.exit(1);
         }
 
