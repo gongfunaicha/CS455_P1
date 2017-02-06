@@ -1,13 +1,18 @@
 package cs455.overlay.node;
 
+import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.wireformats.Event;
+
+import java.io.IOException;
+import java.net.Socket;
 
 public class MessagingNode implements Node {
 
     private String registry_host;
     private int registry_port;
     private TCPServerThread messagingNodeServerThread = null;
+    private TCPSender registrySender = null;
 
     @Override
     public void onEvent(Event e) {
@@ -46,9 +51,19 @@ public class MessagingNode implements Node {
         // Set portnum = 0 to make java select an available port freely
         messagingNodeServerThread = new TCPServerThread(this, 0);
         messagingNodeServerThread.start();
-        System.out.println("Messaging node is now exiting.");
 
-        // TODO: prepare to connect to registry.
+        // Connect to registry and create registrySender
+        try {
+            Socket registrySocket = new Socket(registry_host, registry_port);
+            registrySender = new TCPSender(registrySocket);
+        } catch (IOException e) {
+            System.out.println("Unable to connect to registry. Program will now exit");
+            System.exit(1);
+        }
+
+
+
+        System.out.println("Messaging node is now exiting.");
     }
 
     public static void main(String[] args)
