@@ -20,4 +20,9 @@ public class TCPSender {
         dout.write(dataToSend, 0, dataLength);
         dout.flush();
     }
+
+    public Socket getSenderSocket()
+    {
+        return senderSocket;
+    }
 }
