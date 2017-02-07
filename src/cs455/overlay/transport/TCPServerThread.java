@@ -6,19 +6,24 @@ import cs455.overlay.node.Node;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class TCPServerThread extends Thread {
 
     private ServerSocket serverSocket = null;
     private String HostIP = null;
     private int port = 0;
-    private Node node;
+    private Node node = null;
+    private ArrayList<TCPReceiverThread> listTCPReceiverThread = null;
+    private volatile boolean stop = false;
 
     public TCPServerThread(Node nd, int portnum)
     {
         this.node = nd;
         this.port = portnum;
+        this.listTCPReceiverThread = new ArrayList<>();
     }
 
     public void run()
@@ -43,7 +48,24 @@ public class TCPServerThread extends Thread {
 
         System.out.println("Node is now listening on IP: " + HostIP + " Port: " + port);
 
-        // TODO: Continuously accept incoming connection and spawn TCP Receiver Thread
+        // Continuously accept incoming connection and spawn TCP Receiver Thread
+        while (!stop)
+        {
+            Socket incoming_socket = null;
+            TCPReceiverThread tcpReceiverThread = null;
+            try {
+                incoming_socket = serverSocket.accept();
+                tcpReceiverThread = new TCPReceiverThread(incoming_socket, node);
+            } catch (IOException e) {
+                System.out.println("Failed to accept incoming connection.");
+                continue;
+            }
+            // Start TCP Receiver Thread and add to list
+            tcpReceiverThread.run();
+            listTCPReceiverThread.add(tcpReceiverThread);
+        }
+
+        System.out.println("TCP Server Thread has stopped.");
     }
 
     public String getHostIP()
@@ -59,5 +81,10 @@ public class TCPServerThread extends Thread {
     public ServerSocket getServerSocket()
     {
         return serverSocket;
+    }
+
+    public void setStop()
+    {
+        this.stop = true;
     }
 }
