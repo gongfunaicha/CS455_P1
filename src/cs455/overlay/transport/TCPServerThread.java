@@ -51,8 +51,8 @@ public class TCPServerThread extends Thread {
         // Continuously accept incoming connection and spawn TCP Receiver Thread
         while (!stop)
         {
-            Socket incoming_socket = null;
-            TCPReceiverThread tcpReceiverThread = null;
+            Socket incoming_socket;
+            TCPReceiverThread tcpReceiverThread;
             try {
                 incoming_socket = serverSocket.accept();
                 tcpReceiverThread = new TCPReceiverThread(incoming_socket, node);
@@ -63,6 +63,23 @@ public class TCPServerThread extends Thread {
             // Start TCP Receiver Thread and add to list
             tcpReceiverThread.run();
             listTCPReceiverThread.add(tcpReceiverThread);
+        }
+
+        // Close all sockets ???
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            System.out.println("Failed to close server socket.");
+        }
+
+        for (TCPReceiverThread tcpReceiverThread : listTCPReceiverThread)
+        {
+            Socket connected_socket = tcpReceiverThread.getSocket();
+            try {
+                connected_socket.close();
+            } catch (IOException e) {
+                System.out.println("Failed to close connected socket.");
+            }
         }
 
         System.out.println("TCP Server Thread has stopped.");

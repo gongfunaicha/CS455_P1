@@ -40,7 +40,7 @@ public class TCPReceiverThread extends Thread{
             }
 
             // Notify node of event
-            Event event = null;
+            Event event;
             try {
                 event = EventFactory.createEventFromData(data);
                 node.onEvent(event);
@@ -48,5 +48,10 @@ public class TCPReceiverThread extends Thread{
                 System.out.println("Received invalid data. Data dropped.");
             }
         }
+    }
+
+    public Socket getSocket()
+    {
+        return socket;
     }
 }
