@@ -152,6 +152,7 @@ public class Registry implements Node {
         String IP = deregisterRequest.getIP();
         int port = deregisterRequest.getPort();
         Socket requesterSocket = deregisterRequest.getRequesterSocket();
+        System.out.println("Got deregister request from IP: " + IP + " Port: " + String.valueOf(port) + ".");
         try {
             if (!registrySenders.containsKey(requesterSocket))
             {
@@ -194,7 +195,8 @@ public class Registry implements Node {
     private void sendDeregisterResponse(TCPSender sender, boolean status, String addiinfo)
     {
         try {
-            // TODO: Send deregister response
+            DeregisterResponse deregisterResponse = new DeregisterResponse(status, addiinfo);
+            sender.sendData(deregisterResponse.getBytes());
         }
         catch (IOException e)
         {
