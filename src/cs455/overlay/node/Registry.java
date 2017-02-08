@@ -3,7 +3,9 @@ import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.wireformats.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 
@@ -21,14 +23,56 @@ public class Registry implements Node {
         registrySenders = new HashMap<>();
         registeredNodes = new HashMap<>();
 
-        // TODO: Registry next steps
-//         For testing
+        // Create buffered reader
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
         while (true)
         {
-            int i = 0;
-            i=i+1;
+            String userinput;
+            try {
+                userinput = br.readLine();
+            }
+            catch (IOException ioe)
+            {
+                System.out.println("Failed to read user input.");
+                continue;
+            }
+            if (userinput.equals("list-messaging-nodes"))
+            {
+                if (registeredNodes.size() != 0)
+                {
+                    System.out.println("The following messaging nodes are currently connected:");
+                    for (String identity: registeredNodes.keySet())
+                    {
+                        System.out.println(identity);
+                    }
+                }
+                else
+                {
+                    System.out.println("There is no messaging node currently connected.");
+                }
+            }
+            else if (userinput.equals("list-weights"))
+            {
+                // TODO: handle user input of "list-weights"
+            }
+            else if (userinput.startsWith("setup-overlay "))
+            {
+                // TODO: handle user input of "setup-overlay"
+            }
+            else if (userinput.equals("send-overlay-link-weights"))
+            {
+                // TODO: handle user input of "send-overlay-link-weights"
+            }
+            else if (userinput.startsWith("start "))
+            {
+                // TODO: handle user input of "start"
+            }
+            else
+            {
+                System.out.println("Unrecognized command.");
+            }
         }
-//        System.out.println("Registry is now exiting.");
     }
 
     public static void main(String[] args)

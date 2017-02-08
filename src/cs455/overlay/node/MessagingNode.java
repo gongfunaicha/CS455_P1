@@ -82,10 +82,7 @@ public class MessagingNode implements Node {
             }
             else
             {
-                System.out.println("Unrecognized command. Please enter:");
-                System.out.println("print-shortest-path");
-                System.out.println("or");
-                System.out.println("exit-overlay");
+                System.out.println("Unrecognized command.");
             }
         }
 
