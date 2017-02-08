@@ -28,6 +28,8 @@ public class MessagingNode implements Node {
             case REGISTER_RESPONSE:
                 handleRegisterResponse(e);
                 break;
+            case DEREGISTER_RESPONSE:
+                handleDeregisterResponse(e);
             default:
                 System.out.println("Invalid event received.");
         }
@@ -206,7 +208,7 @@ public class MessagingNode implements Node {
         RegisterResponse registerResponse = (RegisterResponse)e;
         boolean status = registerResponse.getStatus();
         String addiInfo = registerResponse.getAddiinfo();
-        if (status == false)
+        if (!status)
         {
             // Register response is failure
             System.out.println("Received failure register response from registry with following information:");
@@ -239,5 +241,23 @@ public class MessagingNode implements Node {
     private void handleDeregisterResponse(Event e)
     {
         DeregisterResponse deregisterResponse = (DeregisterResponse)e;
+        boolean status = deregisterResponse.getStatus();
+        String addiinfo = deregisterResponse.getAddiinfo();
+        if (!status)
+        {
+            // Deregister failed
+            System.out.println("Received failure deregister response from registry with following information:");
+            System.out.println(addiinfo);
+            System.out.println("Program will now exit.");
+            System.exit(1);
+        }
+        else
+        {
+            // Deregister Success
+            System.out.println("Successfully registered with registry. The registry sent the following information:");
+            System.out.println(addiinfo);
+            System.out.println("Program will now exit.");
+            System.exit(0);
+        }
     }
 }

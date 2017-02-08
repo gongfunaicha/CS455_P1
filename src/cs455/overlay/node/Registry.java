@@ -22,13 +22,13 @@ public class Registry implements Node {
         registeredNodes = new HashMap<>();
 
         // TODO: Registry next steps
-        // For testing
-//        while (true)
-//        {
-//            int i = 0;
-//            i=i+1;
-//        }
-        System.out.println("Registry is now exiting.");
+//         For testing
+        while (true)
+        {
+            int i = 0;
+            i=i+1;
+        }
+//        System.out.println("Registry is now exiting.");
     }
 
     public static void main(String[] args)
@@ -110,8 +110,8 @@ public class Registry implements Node {
             // Contains no entry in registrySenders and registeredNodes, create TCPSender instance
             TCPSender sender = new TCPSender(requesterSocket);
 
-            // Check whether it is honest
-            if (IP.equals(requesterSocket.getInetAddress().getHostAddress()))
+            // Check whether it is honest, if 127.0.0.1 check whether it claims to have the same IP as registry
+            if (IP.equals(requesterSocket.getInetAddress().getHostAddress()) || (requesterSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && registryServerThread.getHostIP().equals(IP)))
             {
                 // Honest, add to registrySenders and registeredNodes
                 registrySenders.put(requesterSocket, sender);
@@ -123,6 +123,7 @@ public class Registry implements Node {
             else
             {
                 // Not honest
+                System.out.println(requesterSocket.getInetAddress().getHostAddress());
                 sendRegisterResponse(sender,false,"IP mismatch.");
             }
 
@@ -176,7 +177,7 @@ public class Registry implements Node {
             }
 
             // Previously registered, check whether it is honest
-            if (!IP.equals(requesterSocket.getInetAddress().getHostAddress()))
+            if (!(IP.equals(requesterSocket.getInetAddress().getHostAddress()) || (requesterSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && registryServerThread.getHostIP().equals(IP))))
             {
                 // Not honest, send failure message
                 sendDeregisterResponse(registrySenders.get(requesterSocket), false, "Claimed false IP address.");

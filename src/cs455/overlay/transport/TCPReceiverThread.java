@@ -35,7 +35,7 @@ public class TCPReceiverThread extends Thread{
                 System.out.println(se.getMessage());
                 break;
             } catch (IOException ioe) {
-                System.out.println(ioe.getMessage());
+//                System.out.println(ioe.getMessage());
                 break;
             }
 

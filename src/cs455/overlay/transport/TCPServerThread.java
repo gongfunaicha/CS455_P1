@@ -60,7 +60,7 @@ public class TCPServerThread extends Thread {
                 continue;
             }
             // Start TCP Receiver Thread and add to list
-            tcpReceiverThread.run();
+            tcpReceiverThread.start();
             listTCPReceiverThread.add(tcpReceiverThread);
         }
 
