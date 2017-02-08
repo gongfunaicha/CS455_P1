@@ -166,7 +166,7 @@ public class MessagingNode implements Node {
     private void sendRegisterRequest()
     {
         // Send register request to the registry
-        RegisterRequest registerRequest = new RegisterRequest(registry_host, registry_port);
+        RegisterRequest registerRequest = new RegisterRequest(messagingNodeServerThread.getHostIP(), messagingNodeServerThread.getPort());
         try {
             registrySender.sendData(registerRequest.getBytes());
         }
