@@ -4,16 +4,25 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 public class RegisterRequest implements Event{
 
     private String IP = null;
     private int port = 0;
+    private Socket requesterSocket = null;
 
     public RegisterRequest(String IPAddr, int portnum)
     {
         this.IP = IPAddr;
         this.port = portnum;
+    }
+
+    public RegisterRequest(String IPAddr, int portnum, Socket requesterSkt)
+    {
+        this.IP = IPAddr;
+        this.port = portnum;
+        this.requesterSocket = requesterSkt;
     }
 
     @Override
@@ -49,5 +58,20 @@ public class RegisterRequest implements Event{
         dout.close();
 
         return marshalledBytes;
+    }
+
+    public Socket getRequesterSocket()
+    {
+        return requesterSocket;
+    }
+
+    public String getIP()
+    {
+        return IP;
+    }
+
+    public int getPort()
+    {
+        return port;
     }
 }

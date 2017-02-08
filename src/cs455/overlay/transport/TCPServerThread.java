@@ -17,7 +17,6 @@ public class TCPServerThread extends Thread {
     private int port = 0;
     private Node node = null;
     private ArrayList<TCPReceiverThread> listTCPReceiverThread = null;
-    private volatile boolean stop = false;
 
     public TCPServerThread(Node nd, int portnum)
     {
@@ -49,7 +48,7 @@ public class TCPServerThread extends Thread {
         System.out.println("Node is now listening on IP: " + HostIP + " Port: " + port);
 
         // Continuously accept incoming connection and spawn TCP Receiver Thread
-        while (!stop)
+        while (!isInterrupted())
         {
             Socket incoming_socket;
             TCPReceiverThread tcpReceiverThread;
@@ -100,8 +99,4 @@ public class TCPServerThread extends Thread {
         return serverSocket;
     }
 
-    public void setStop()
-    {
-        this.stop = true;
-    }
 }

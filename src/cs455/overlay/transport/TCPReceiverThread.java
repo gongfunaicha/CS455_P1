@@ -42,7 +42,7 @@ public class TCPReceiverThread extends Thread{
             // Notify node of event
             Event event;
             try {
-                event = EventFactory.createEventFromData(data);
+                event = EventFactory.createEventFromData(data, socket);
                 node.onEvent(event);
             } catch (IOException e) {
                 System.out.println("Received invalid data. Data dropped.");

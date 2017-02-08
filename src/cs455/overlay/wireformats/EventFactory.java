@@ -4,11 +4,12 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 // EventFactory is responsible of creating instance of subclass of Event based on the data it received
 public class EventFactory {
 
-    public static Event createEventFromData(byte[] data) throws IOException
+    public static Event createEventFromData(byte[] data, Socket socket) throws IOException
     {
         ByteArrayInputStream baInputStream = new ByteArrayInputStream(data);
         DataInputStream din = new DataInputStream(new BufferedInputStream(baInputStream));
@@ -25,9 +26,8 @@ public class EventFactory {
                 din.readFully(IPBytes,0,len_IP);
                 String IP = new String(IPBytes);
                 int port = din.readInt();
-                // Create RegisterRequest instance
-                RegisterRequest registerRequest = new RegisterRequest(IP, port);
-                return registerRequest;
+                // Return RegisterRequest instance
+                return new RegisterRequest(IP, port, socket);
             default:
                 System.out.println("Invalid message type received.");
                 return null;
