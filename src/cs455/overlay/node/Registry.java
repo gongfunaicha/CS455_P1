@@ -68,6 +68,11 @@ public class Registry implements Node {
             {
                 // TODO: handle user input of "start"
             }
+            else if (userinput.equals("exit"))
+            {
+                System.out.println("Registry will now exit.");
+                System.exit(0);
+            }
             else
             {
                 System.out.println("Unrecognized command.");
