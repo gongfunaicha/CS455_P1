@@ -28,6 +28,13 @@ public class EventFactory {
                 int port = din.readInt();
                 // Return RegisterRequest instance
                 return new RegisterRequest(IP, port, socket);
+            case REGISTER_RESPONSE:
+                // remaining format: byte status, int len_addiinfo, String addi_info
+                boolean status = din.readBoolean();
+                int len_addiinfo = din.readInt();
+                byte[] addiinfoBytes = new byte[len_addiinfo];
+                String addi_info = new String(addiinfoBytes);
+                return new RegisterResponse(status, addi_info);
             default:
                 System.out.println("Invalid message type received.");
                 return null;

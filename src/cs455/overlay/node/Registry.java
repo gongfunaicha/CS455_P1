@@ -86,6 +86,7 @@ public class Registry implements Node {
         Socket requesterSocket = registerRequest.getRequesterSocket();
         String IP = registerRequest.getIP();
         int port = registerRequest.getPort();
+        System.out.println("Got register request from IP: " + IP + " Port: " + String.valueOf(port) + ".");
 
         // Duplicate entry, send failure response
         if (registrySenders.containsKey(requesterSocket))
@@ -126,6 +127,7 @@ public class Registry implements Node {
         } catch (IOException ioe) {
             System.out.print("Failed to create TCP Sender instance.");
         }
+
 
     }
 

@@ -21,6 +21,7 @@ public class RegisterResponse implements Event{
         return Protocol.REGISTER_RESPONSE;
     }
 
+    // Format: int Message_Type, byte status, int len_addiinfo, String addi_info
     @Override
     public byte[] getBytes() throws IOException {
         byte[] marshalledBytes = null;
@@ -46,5 +47,15 @@ public class RegisterResponse implements Event{
         dout.close();
 
         return marshalledBytes;
+    }
+
+    public boolean getStatus()
+    {
+        return status;
+    }
+
+    public String getAddiinfo()
+    {
+        return addiinfo;
     }
 }

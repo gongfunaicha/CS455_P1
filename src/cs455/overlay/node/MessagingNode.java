@@ -3,7 +3,9 @@ package cs455.overlay.node;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.wireformats.Event;
+import cs455.overlay.wireformats.Protocol;
 import cs455.overlay.wireformats.RegisterRequest;
+import cs455.overlay.wireformats.RegisterResponse;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -17,7 +19,15 @@ public class MessagingNode implements Node {
 
     @Override
     public void onEvent(Event e) {
-        // TODO: What to do on onEvent?
+        Protocol type = e.getType();
+        switch (type)
+        {
+            case REGISTER_RESPONSE:
+                handleRegisterResponse(e);
+                break;
+            default:
+                System.out.println("Invalid event received.");
+        }
     }
 
     public MessagingNode(String[] args)
@@ -146,6 +156,27 @@ public class MessagingNode implements Node {
         {
             System.out.println("Unable to send register request to registry. Program will now exit");
             System.exit(1);
+        }
+    }
+
+    private void handleRegisterResponse(Event e)
+    {
+        RegisterResponse registerResponse = (RegisterResponse)e;
+        boolean status = registerResponse.getStatus();
+        String addiInfo = registerResponse.getAddiinfo();
+        if (status == false)
+        {
+            // Register response is failure
+            System.out.println("Received failure register response from registry with following information:");
+            System.out.println(addiInfo);
+            System.out.println("Program will now exit.");
+            System.exit(1);
+        }
+        else
+        {
+            // Register success
+            System.out.println("Successfully registered with registry. The registry sent the following information:");
+            System.out.println(addiInfo);
         }
     }
 }
