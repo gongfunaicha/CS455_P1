@@ -2,10 +2,7 @@ package cs455.overlay.node;
 
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
-import cs455.overlay.wireformats.Event;
-import cs455.overlay.wireformats.Protocol;
-import cs455.overlay.wireformats.RegisterRequest;
-import cs455.overlay.wireformats.RegisterResponse;
+import cs455.overlay.wireformats.*;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -17,6 +14,7 @@ public class MessagingNode implements Node {
     private TCPServerThread messagingNodeServerThread = null;
     private TCPSender registrySender = null;
     private boolean shortestPathCalculated = false;
+    private boolean sentDeregisterRequest = false;
 
     @Override
     public void onEvent(Event e) {
@@ -54,7 +52,16 @@ public class MessagingNode implements Node {
             }
             else if (userinput.equals("exit-overlay"))
             {
-                // TODO: handle user input of "exit-overlay"
+                if (sentDeregisterRequest)
+                {
+                    System.out.println("You've already exited overlay before. Program should exit shortly.");
+                }
+                else
+                {
+                    sendDeregisterRequest();
+                    System.out.println("Deregister request sent.");
+                    sentDeregisterRequest = true;
+                }
             }
             else
             {
@@ -195,6 +202,20 @@ public class MessagingNode implements Node {
             // Register success
             System.out.println("Successfully registered with registry. The registry sent the following information:");
             System.out.println(addiInfo);
+        }
+    }
+
+    private void sendDeregisterRequest()
+    {
+        // Send deregister request to the registry
+        DeregisterRequest deregisterRequest = new DeregisterRequest(messagingNodeServerThread.getHostIP(), messagingNodeServerThread.getPort());
+        try {
+            registrySender.sendData(deregisterRequest.getBytes());
+        }
+        catch (IOException e)
+        {
+            System.out.println("Unable to send deregister request to registry. Program will now exit");
+            System.exit(1);
         }
     }
 }

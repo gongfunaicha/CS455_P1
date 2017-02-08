@@ -33,6 +33,7 @@ public class EventFactory {
                 boolean status = din.readBoolean();
                 int len_addiinfo = din.readInt();
                 byte[] addiinfoBytes = new byte[len_addiinfo];
+                din.readFully(addiinfoBytes, 0, len_addiinfo);
                 String addi_info = new String(addiinfoBytes);
                 return new RegisterResponse(status, addi_info);
             case DEREGISTER_REQUEST:
@@ -44,6 +45,14 @@ public class EventFactory {
                 int port_dereg = din.readInt();
                 // Return RegisterRequest instance
                 return new DeregisterRequest(IP_dereg, port_dereg, socket);
+            case DEREGISTER_RESPONSE:
+                // remaining format: byte status, int len_addiinfo, String addi_info
+                boolean status_dereg = din.readBoolean();
+                int len_addiinfo_dereg = din.readInt();
+                byte[] addiinfoBytes_dereg = new byte[len_addiinfo_dereg];
+                din.readFully(addiinfoBytes_dereg, 0, len_addiinfo_dereg);
+                String addi_info_dereg = new String(addiinfoBytes_dereg);
+                return new DeregisterResponse(status_dereg, addi_info_dereg);
             default:
                 System.out.println("Invalid message type received.");
                 return null;
