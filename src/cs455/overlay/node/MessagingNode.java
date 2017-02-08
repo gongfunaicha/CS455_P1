@@ -16,6 +16,7 @@ public class MessagingNode implements Node {
     private int registry_port;
     private TCPServerThread messagingNodeServerThread = null;
     private TCPSender registrySender = null;
+    private boolean shortestPathCalculated = false;
 
     @Override
     public void onEvent(Event e) {
@@ -44,9 +45,26 @@ public class MessagingNode implements Node {
         // Send register request
         sendRegisterRequest();
 
-        // TODO: Waiting for user input?
+        while (true)
+        {
+            String userinput = System.console().readLine();
+            if (userinput.equals("print-shortest-path"))
+            {
+                // TODO: handle user input of "print-shortest-path"
+            }
+            else if (userinput.equals("exit-overlay"))
+            {
+                // TODO: handle user input of "exit-overlay"
+            }
+            else
+            {
+                System.out.println("Unrecognized command. Please enter:");
+                System.out.println("print-shortest-path");
+                System.out.println("or");
+                System.out.println("exit-overlay");
+            }
+        }
 
-        System.out.println("Messaging node is now exiting.");
     }
 
     public static void main(String[] args)
