@@ -1,10 +1,13 @@
 package cs455.overlay.node;
 
+import cs455.overlay.transport.TCPReceiverThread;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.wireformats.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class MessagingNode implements Node {
@@ -13,6 +16,7 @@ public class MessagingNode implements Node {
     private int registry_port;
     private TCPServerThread messagingNodeServerThread = null;
     private TCPSender registrySender = null;
+    private TCPReceiverThread registryReceiver = null;
     private boolean shortestPathCalculated = false;
     private boolean sentDeregisterRequest = false;
 
@@ -43,9 +47,20 @@ public class MessagingNode implements Node {
         // Send register request
         sendRegisterRequest();
 
+        // Create buffered reader
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
         while (true)
         {
-            String userinput = System.console().readLine();
+            String userinput;
+            try {
+                userinput = br.readLine();
+            }
+            catch (IOException ioe)
+            {
+                System.out.println("Failed to read user input.");
+                continue;
+            }
             if (userinput.equals("print-shortest-path"))
             {
                 // TODO: handle user input of "print-shortest-path"
@@ -160,10 +175,12 @@ public class MessagingNode implements Node {
 
     private void connectRegistry()
     {
-        // Connect to registry and create registrySender
+        // Connect to registry and create registrySender and receiver
         try {
             Socket registrySocket = new Socket(registry_host, registry_port);
             registrySender = new TCPSender(registrySocket);
+            registryReceiver = new TCPReceiverThread(registrySocket, this);
+            registryReceiver.start();
         } catch (IOException e) {
             System.out.println("Unable to connect to registry. Program will now exit");
             System.exit(1);
@@ -217,5 +234,10 @@ public class MessagingNode implements Node {
             System.out.println("Unable to send deregister request to registry. Program will now exit");
             System.exit(1);
         }
+    }
+
+    private void handleDeregisterResponse(Event e)
+    {
+        DeregisterResponse deregisterResponse = (DeregisterResponse)e;
     }
 }

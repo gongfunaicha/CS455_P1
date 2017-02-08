@@ -22,6 +22,12 @@ public class Registry implements Node {
         registeredNodes = new HashMap<>();
 
         // TODO: Registry next steps
+        // For testing
+//        while (true)
+//        {
+//            int i = 0;
+//            i=i+1;
+//        }
         System.out.println("Registry is now exiting.");
     }
 
@@ -181,7 +187,7 @@ public class Registry implements Node {
             TCPSender sender = registrySenders.get(requesterSocket);
             registrySenders.remove(requesterSocket);
             registeredNodes.remove(fullIdentity);
-            sendDeregisterResponse(registrySenders.get(requesterSocket), true, "Deregistration request successful. The number of remaining messaging nodes is " + String.valueOf(registeredNodes.size()) + ".");
+            sendDeregisterResponse(sender, true, "Deregistration request successful. The number of remaining messaging nodes is " + String.valueOf(registeredNodes.size()) + ".");
         }
         catch (IOException ioe)
         {
