@@ -35,6 +35,15 @@ public class EventFactory {
                 byte[] addiinfoBytes = new byte[len_addiinfo];
                 String addi_info = new String(addiinfoBytes);
                 return new RegisterResponse(status, addi_info);
+            case DEREGISTER_REQUEST:
+                // remaining format: int len_IP, char[] IP, int port_num
+                int len_IP_dereg = din.readInt();
+                byte[] IPBytes_dereg = new byte[len_IP_dereg];
+                din.readFully(IPBytes_dereg,0,len_IP_dereg);
+                String IP_dereg = new String(IPBytes_dereg);
+                int port_dereg = din.readInt();
+                // Return RegisterRequest instance
+                return new DeregisterRequest(IP_dereg, port_dereg, socket);
             default:
                 System.out.println("Invalid message type received.");
                 return null;

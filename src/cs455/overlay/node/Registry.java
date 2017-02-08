@@ -1,10 +1,7 @@
 package cs455.overlay.node;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
-import cs455.overlay.wireformats.Event;
-import cs455.overlay.wireformats.Protocol;
-import cs455.overlay.wireformats.RegisterRequest;
-import cs455.overlay.wireformats.RegisterResponse;
+import cs455.overlay.wireformats.*;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -68,6 +65,9 @@ public class Registry implements Node {
         {
             case REGISTER_REQUEST:
                 handleRegisterRequest(e);
+                break;
+            case DEREGISTER_REQUEST:
+                handleDeregisterRequest(e);
                 break;
             default:
                 System.out.println("Invalid event received.");
@@ -144,5 +144,61 @@ public class Registry implements Node {
             System.out.println("Failed to send register response.");
         }
 
+    }
+
+    private void handleDeregisterRequest(Event e)
+    {
+        DeregisterRequest deregisterRequest = (DeregisterRequest)e;
+        String IP = deregisterRequest.getIP();
+        int port = deregisterRequest.getPort();
+        Socket requesterSocket = deregisterRequest.getRequesterSocket();
+        try {
+            if (!registrySenders.containsKey(requesterSocket))
+            {
+                // Previously not registered, send failure message
+                // First create TCPSender
+                TCPSender sender = new TCPSender(requesterSocket);
+                sendDeregisterResponse(sender, false, "Node was not previously registered.");
+                return;
+            }
+
+            // requesterSocket contained in registrySenders, check full identity in registeredNodes
+            String fullIdentity = IP + ":" + String.valueOf(port);
+            if (!registeredNodes.containsKey(fullIdentity))
+            {
+                // Previously not registered, send failure message
+                sendDeregisterResponse(registrySenders.get(requesterSocket), false, "Node was not previously registered.");
+                return;
+            }
+
+            // Previously registered, check whether it is honest
+            if (!IP.equals(requesterSocket.getInetAddress().getHostAddress()))
+            {
+                // Not honest, send failure message
+                sendDeregisterResponse(registrySenders.get(requesterSocket), false, "Claimed false IP address.");
+                return;
+            }
+
+            // Previously registered and honest, do deregistration
+            TCPSender sender = registrySenders.get(requesterSocket);
+            registrySenders.remove(requesterSocket);
+            registeredNodes.remove(fullIdentity);
+            sendDeregisterResponse(registrySenders.get(requesterSocket), true, "Deregistration request successful. The number of remaining messaging nodes is " + String.valueOf(registeredNodes.size()) + ".");
+        }
+        catch (IOException ioe)
+        {
+            System.out.println("Failed to respond to deregister request.");
+        }
+    }
+
+    private void sendDeregisterResponse(TCPSender sender, boolean status, String addiinfo)
+    {
+        try {
+            // TODO: Send deregister response
+        }
+        catch (IOException e)
+        {
+            System.out.println("Failed to send deregister response.");
+        }
     }
 }
