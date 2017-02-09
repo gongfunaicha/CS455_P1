@@ -30,6 +30,11 @@ public class MessagingNode implements Node {
                 break;
             case DEREGISTER_RESPONSE:
                 handleDeregisterResponse(e);
+                break;
+            case MESSAGING_NODES_LIST:
+                // TODO: Handle messaging node list
+            case LINK_WEIGHTS:
+                // TODO: Handle link weights
             default:
                 System.out.println("Invalid event received.");
         }

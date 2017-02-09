@@ -1,19 +1,24 @@
 package cs455.overlay.node;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
+import cs455.overlay.util.OverlayCreator;
 import cs455.overlay.wireformats.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InterfaceAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class Registry implements Node {
 
     private TCPServerThread registryServerThread = null;
     private HashMap<Socket, TCPSender> registrySenders = null;
     private HashMap<String, TCPSender> registeredNodes = null;
+    private OverlayCreator overlayCreator = null;
 
     public Registry(int portnum)
     {
@@ -58,11 +63,62 @@ public class Registry implements Node {
             }
             else if (userinput.startsWith("setup-overlay "))
             {
-                // TODO: handle user input of "setup-overlay"
+                // Parse user input
+                String numberOfConnections = userinput.substring(14);
+                int numConn = 0;
+                try {
+                    numConn = Integer.valueOf(numberOfConnections);
+                }
+                catch (NumberFormatException nfe)
+                {
+                    System.out.println("Invalid number of connections");
+                    continue;
+                }
+                if (numConn != 4)
+                {
+                    System.out.println("Currently only support 4 connections.");
+                    continue;
+                }
+                Set<String> Nodes = registeredNodes.keySet();
+                // Get all TCPSenders
+                ArrayList<TCPSender> tcpSenders = new ArrayList<TCPSender>(registeredNodes.values());
+                try {
+                    MessagingNodesList messagingNodesList = new MessagingNodesList(Nodes);
+                    byte[] data = messagingNodesList.getBytes();
+                    // Send data using all tcpSenders
+                    for (TCPSender sender: tcpSenders)
+                        sender.sendData(data);
+                }
+                catch (IOException ioe)
+                {
+                    System.out.println("Failed to send out messaging node list.");
+                    continue;
+                }
+                // Start creating overlay
+                overlayCreator = new OverlayCreator(Nodes);
+                overlayCreator.createOverlay();
             }
             else if (userinput.equals("send-overlay-link-weights"))
             {
-                // TODO: handle user input of "send-overlay-link-weights"
+                if (overlayCreator == null)
+                {
+                    System.out.println("Could not send out overlay link weights information. Please run setup-overlay command first.");
+                }
+                else
+                {
+                    ArrayList<TCPSender> tcpSenders = new ArrayList<TCPSender>(registeredNodes.values());
+                    try {
+                        LinkWeights linkWeights = new LinkWeights(overlayCreator.getNumLinks(), overlayCreator.formattedOverlay());
+                        byte[] data = linkWeights.getBytes();
+                        // Send data using all tcpSenders
+                        for (TCPSender sender: tcpSenders)
+                            sender.sendData(data);
+                    }
+                    catch (IOException ioe)
+                    {
+                        System.out.println("Failed to send out link weight.");
+                    }
+                }
             }
             else if (userinput.startsWith("start "))
             {
