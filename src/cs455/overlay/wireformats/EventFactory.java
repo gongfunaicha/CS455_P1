@@ -53,6 +53,22 @@ public class EventFactory {
                 din.readFully(addiinfoBytes_dereg, 0, len_addiinfo_dereg);
                 String addi_info_dereg = new String(addiinfoBytes_dereg);
                 return new DeregisterResponse(status_dereg, addi_info_dereg);
+            case MESSAGING_NODES_LIST:
+                // remaining format: int numNodes, int len_stringNodes, String stringNodes
+                int numNodes = din.readInt();
+                int len_stringNodes = din.readInt();
+                byte[] stringNodesBytes = new byte[len_stringNodes];
+                din.readFully(stringNodesBytes, 0, len_stringNodes);
+                String stringNodes = new String(stringNodesBytes);
+                return new MessagingNodesList(numNodes,stringNodes);
+            case LINK_WEIGHTS:
+                // remaining format: int numLinks, int len_linkInfo, String linkInfo
+                int numLinks = din.readInt();
+                int len_linkInfo = din.readInt();
+                byte[] linkInfoBytes = new byte[len_linkInfo];
+                din.readFully(linkInfoBytes, 0, len_linkInfo);
+                String linkInfo = new String(linkInfoBytes);
+                return new LinkWeights(numLinks, linkInfo);
             default:
                 System.out.println("Invalid message type received.");
                 return null;
