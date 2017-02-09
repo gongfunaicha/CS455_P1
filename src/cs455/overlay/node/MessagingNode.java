@@ -19,6 +19,10 @@ public class MessagingNode implements Node {
     private TCPReceiverThread registryReceiver = null;
     private boolean shortestPathCalculated = false;
     private boolean sentDeregisterRequest = false;
+    private int numNodes = 0;
+    private String stringNodes = null;
+    private int numLinks = 0;
+    private String linkInfo = null;
 
     @Override
     public void onEvent(Event e) {
@@ -32,9 +36,11 @@ public class MessagingNode implements Node {
                 handleDeregisterResponse(e);
                 break;
             case MESSAGING_NODES_LIST:
-                // TODO: Handle messaging node list
+                handleMessagingNodesList(e);
+                break;
             case LINK_WEIGHTS:
-                // TODO: Handle link weights
+                handleLinkWeights(e);
+                break;
             default:
                 System.out.println("Invalid event received.");
         }
@@ -261,5 +267,20 @@ public class MessagingNode implements Node {
             System.out.println("Program will now exit.");
             System.exit(0);
         }
+    }
+
+    private void handleMessagingNodesList(Event e)
+    {
+        MessagingNodesList messagingNodesList = (MessagingNodesList)e;
+        this.numNodes = messagingNodesList.getNumNodes();
+        this.stringNodes = messagingNodesList.getStringNodes();
+    }
+
+    private void handleLinkWeights(Event e)
+    {
+        LinkWeights linkWeights = (LinkWeights)e;
+        this.numLinks = linkWeights.getNumLinks();
+        this.linkInfo = linkWeights.getLinkInfo();
+        // TODO: Do decoding and dijkstra
     }
 }
