@@ -89,6 +89,26 @@ public class EventFactory {
                 // remaining format: int numRounds
                 int numRounds = din.readInt();
                 return new TaskInitiate(numRounds);
+            case MESSAGE:
+                // remaining format: int len_srcIdentity, String srcIdentity, int len_destIdentity, String destIdentity, int payload
+                int len_srcIdentity = din.readInt();
+                byte[] srcIdentityByte = new byte[len_srcIdentity];
+                din.readFully(srcIdentityByte,0,len_srcIdentity);
+                String srcIdentity = new String(srcIdentityByte);
+                int len_destIdentity = din.readInt();
+                byte[] destIdentityByte = new byte[len_destIdentity];
+                din.readFully(destIdentityByte,0,len_destIdentity);
+                String destIdentity = new String(destIdentityByte);
+                int payload = din.readInt();
+                return new Message(srcIdentity, destIdentity, payload);
+            case TASK_COMPLETE:
+                // remaining format: int len_IP, char[] IP, int port_num
+                int len_IP_tc = din.readInt();
+                byte[] IP_tc_Byte = new byte[len_IP_tc];
+                din.readFully(IP_tc_Byte, 0, len_IP_tc);
+                String IP_tc = new String(IP_tc_Byte);
+                int port_tc = din.readInt();
+                return new TaskComplete(IP_tc, port_tc);
             default:
                 System.out.println("Invalid message type received.");
                 return null;

@@ -19,6 +19,7 @@ public class Registry implements Node {
     private HashMap<String, TCPSender> registeredNodes = null;
     private OverlayCreator overlayCreator = null;
     int numPreparedNodes = 0;
+    int numCompletedNodes = 0;
 
     public Registry(int portnum)
     {
@@ -82,6 +83,7 @@ public class Registry implements Node {
                 Set<String> Nodes = registeredNodes.keySet();
                 // Clear preparred nodes
                 numPreparedNodes = 0;
+                numCompletedNodes = 0;
                 // Get all TCPSenders
                 ArrayList<TCPSender> tcpSenders = new ArrayList<TCPSender>(registeredNodes.values());
                 try {
@@ -216,6 +218,9 @@ public class Registry implements Node {
                 break;
             case PREPARATION_COMPLETE:
                 handlePreparationComplete(e);
+                break;
+            case TASK_COMPLETE:
+                handleTaskComplete(e);
                 break;
             default:
                 System.out.println("Invalid event received.");
@@ -360,6 +365,16 @@ public class Registry implements Node {
         {
             // All nodes are prepared
             System.out.println("Received prepared information from all nodes.");
+        }
+    }
+
+    private synchronized void handleTaskComplete(Event e)
+    {
+        numCompletedNodes++;
+        if (numCompletedNodes == overlayCreator.getNumNodes())
+        {
+            // All nodes complete
+            // TODO: wait 30 seconds before issuing PULL_TRAFFIC_SUMMARY
         }
     }
 }

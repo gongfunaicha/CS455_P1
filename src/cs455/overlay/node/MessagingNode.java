@@ -55,6 +55,9 @@ public class MessagingNode implements Node {
             case TASK_INITIATE:
                 handleTaskInitiate(e);
                 break;
+            case MESSAGE:
+                handleMessage(e);
+                break;
             default:
                 System.out.println("Invalid event received.");
         }
@@ -390,6 +393,8 @@ public class MessagingNode implements Node {
                 try {
                     byte[] data = message.getBytes();
                     nextHopSender.sendData(data);
+                    communicationTracker.incrementSendTracker();
+                    communicationTracker.addSendSummation(payload);
                 }
                 catch (IOException ioe)
                 {
@@ -398,7 +403,51 @@ public class MessagingNode implements Node {
             }
         }
 
-        // TODO: Finished all rounds, send task complete to registry
+        // Finished all rounds, send task complete to registry
+        try {
+            TaskComplete taskComplete = new TaskComplete(messagingNodeServerThread.getHostIP(), messagingNodeServerThread.getPort());
+            byte[] data = taskComplete.getBytes();
+            registrySender.sendData(data);
+        }
+        catch (IOException ioe)
+        {
+            System.out.println("Failed to send task complete message to registry.");
+            System.exit(1);
+        }
+    }
+
+    private void handleMessage(Event e)
+    {
+        Message message = (Message)e;
+        String currentNode = messagingNodeServerThread.getHostIP() + ":" + String.valueOf(messagingNodeServerThread.getPort());
+        String srcNode = message.getSrcIdentity();
+        String destNode = message.getDestIdentity();
+        int payload = message.getPayload();
+
+        if (destNode.equals(currentNode))
+        {
+            // Reach destination
+            communicationTracker.incrementReceiveTracker();
+            communicationTracker.addReceiveSummation(payload);
+        }
+        else
+        {
+            // Relay
+            communicationTracker.incrementRelayTracker();
+
+            // Get nextHop
+            String nextHop = routingCache.getNextHop(destNode);
+            TCPSender nextHopSender = routingCache.getSender(nextHop);
+
+            try {
+                byte[] data = message.getBytes();
+                nextHopSender.sendData(data);
+            }
+            catch (IOException ioe)
+            {
+                System.out.println("Error when trying to relaying message from " + srcNode + " to " + destNode);
+            }
+        }
     }
 
 }
