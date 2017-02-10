@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class Registry implements Node {
 
@@ -374,7 +375,44 @@ public class Registry implements Node {
         if (numCompletedNodes == overlayCreator.getNumNodes())
         {
             // All nodes complete
-            // TODO: wait 30 seconds before issuing PULL_TRAFFIC_SUMMARY
+            try {
+                System.out.println("Received task complete message from all nodes.");
+                System.out.println("30 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(10);
+                System.out.println("20 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(10);
+                System.out.println("10 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(5);
+                System.out.println("5 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("4 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("3 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("2 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("1 seconds before issuing PULL_TRAFFIC_SUMMARY command.");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("Issuing PULL_TRAFFIC_SUMMARY command...");
+            }
+            catch (InterruptedException ie)
+            {
+                System.out.println("Interrupted when waiting to issue PULL_TRAFFIC_SUMMARY command.");
+            }
+
+            try {
+                PullTrafficSummary pullTrafficSummary = new PullTrafficSummary();
+                byte[] data = pullTrafficSummary.getBytes();
+                for (TCPSender sender: registeredNodes.values())
+                {
+                    sender.sendData(data);
+                }
+            }
+            catch (IOException ioe)
+            {
+                System.out.println("Failed to send PULL_TRAFFIC_SUMMARY command.");
+                System.exit(1);
+            }
         }
     }
 }
