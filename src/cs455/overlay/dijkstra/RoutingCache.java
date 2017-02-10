@@ -5,6 +5,7 @@ import cs455.overlay.transport.TCPSender;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class RoutingCache {
     private HashMap<String, String> nodeRoute = null;
@@ -60,5 +61,19 @@ public class RoutingCache {
             shortestPath += route;
         }
         return shortestPath;
+    }
+
+    public ArrayList<String> getOtherNodes()
+    {
+        ArrayList<String> otherNodes = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry: finalCost.entrySet())
+        {
+            if (entry.getValue() != 0)
+            {
+                // Cost 0 => current node
+                otherNodes.add(entry.getKey());
+            }
+        }
+        return otherNodes;
     }
 }

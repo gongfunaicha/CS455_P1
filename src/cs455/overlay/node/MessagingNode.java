@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class MessagingNode implements Node {
@@ -366,7 +368,26 @@ public class MessagingNode implements Node {
             System.out.println("Interrupted when waiting for all communication tracker to initialize");
         }
 
-        // TODO: Send out information
+        ArrayList<String> otherNodes = routingCache.getOtherNodes();
+        int numOtherNodes = otherNodes.size();
+        Random random = new Random();
+
+        for (int i = 0; i < numRounds; i++)
+        {
+            // First find a dest node
+            String dest = otherNodes.get(random.nextInt(numOtherNodes));
+
+            // Next find next hop
+            String nextHop = routingCache.getNextHop(dest);
+            TCPSender nextHopSender = routingCache.getSender(nextHop);
+
+            // Send five messages
+            for (int j = 0; j < 5; j++)
+            {
+                int payload = random.nextInt();
+                // TODO: Send out information
+            }
+        }
     }
 
 }
