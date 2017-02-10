@@ -1,5 +1,7 @@
 package cs455.overlay.node;
 
+import cs455.overlay.dijkstra.NodeAndLink;
+import cs455.overlay.dijkstra.RoutingCache;
 import cs455.overlay.transport.TCPReceiverThread;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
@@ -23,6 +25,7 @@ public class MessagingNode implements Node {
     private String stringNodes = null;
     private int numLinks = 0;
     private String linkInfo = null;
+    private RoutingCache routingCache = null;
 
     @Override
     public void onEvent(Event e) {
@@ -281,6 +284,12 @@ public class MessagingNode implements Node {
         LinkWeights linkWeights = (LinkWeights)e;
         this.numLinks = linkWeights.getNumLinks();
         this.linkInfo = linkWeights.getLinkInfo();
-        // TODO: Do decoding and dijkstra
+
+        // Do Dijkstra
+        String currentNode = messagingNodeServerThread.getHostIP() + ":" + String.valueOf(messagingNodeServerThread.getPort());
+        NodeAndLink nodeAndLink = new NodeAndLink(this.numNodes, this.stringNodes, this.numLinks, this.linkInfo, currentNode);
+        routingCache = nodeAndLink.Dijkstra();
+
+        // TODO: Connect the nodes need to connect
     }
 }

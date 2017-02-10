@@ -21,7 +21,7 @@ public class MessagingNodesList implements Event{
                 // If not first node, add "\n" before adding next node
                 stringNodes += "\n";
             }
-            stringNodes += "Node";
+            stringNodes += Node;
         }
         this.numNodes = Nodes.size();
     }

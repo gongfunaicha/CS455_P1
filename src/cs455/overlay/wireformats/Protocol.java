@@ -10,12 +10,13 @@ public enum Protocol {
     DEREGISTER_RESPONSE(4),
     MESSAGING_NODES_LIST(5),
     LINK_WEIGHTS(6),
-    CALCULATION_COMPLETE(7),
-    TASK_INITIATE(8),
-    MESSAGE(9),
-    TASK_COMPLETE(10),
-    PULL_TRAFFIC_SUMMARY(11),
-    TRAFFIC_SUMMARY(12);
+    HANDSHAKE(7),
+    PREPARATION_COMPLETE(8),
+    TASK_INITIATE(9),
+    MESSAGE(10),
+    TASK_COMPLETE(11),
+    PULL_TRAFFIC_SUMMARY(12),
+    TRAFFIC_SUMMARY(13);
 
     private int value;
     private static HashMap<Integer, Protocol> map = new HashMap<>();
