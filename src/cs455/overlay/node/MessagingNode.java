@@ -376,6 +376,7 @@ public class MessagingNode implements Node {
         {
             // First find a dest node
             String dest = otherNodes.get(random.nextInt(numOtherNodes));
+            String src = messagingNodeServerThread.getHostIP() + ":" + String.valueOf(messagingNodeServerThread.getPort());
 
             // Next find next hop
             String nextHop = routingCache.getNextHop(dest);
@@ -385,9 +386,19 @@ public class MessagingNode implements Node {
             for (int j = 0; j < 5; j++)
             {
                 int payload = random.nextInt();
-                // TODO: Send out information
+                Message message = new Message(src, dest, payload);
+                try {
+                    byte[] data = message.getBytes();
+                    nextHopSender.sendData(data);
+                }
+                catch (IOException ioe)
+                {
+                    System.out.println("Failed to initiate a message to " + dest);
+                }
             }
         }
+
+        // TODO: Finished all rounds, send task complete to registry
     }
 
 }
