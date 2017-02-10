@@ -109,6 +109,8 @@ public class EventFactory {
                 String IP_tc = new String(IP_tc_Byte);
                 int port_tc = din.readInt();
                 return new TaskComplete(IP_tc, port_tc);
+            case PULL_TRAFFIC_SUMMARY:
+                return new PullTrafficSummary();
             default:
                 System.out.println("Invalid message type received.");
                 return null;

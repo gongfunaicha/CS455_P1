@@ -58,6 +58,9 @@ public class MessagingNode implements Node {
             case MESSAGE:
                 handleMessage(e);
                 break;
+            case PULL_TRAFFIC_SUMMARY:
+                handlePullTrafficSummary(e);
+                break;
             default:
                 System.out.println("Invalid event received.");
         }
@@ -448,6 +451,11 @@ public class MessagingNode implements Node {
                 System.out.println("Error when trying to relaying message from " + srcNode + " to " + destNode);
             }
         }
+    }
+
+    private void handlePullTrafficSummary(Event e)
+    {
+        // TODO: handle Pull Traffic Summary message
     }
 
 }
