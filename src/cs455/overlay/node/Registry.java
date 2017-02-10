@@ -19,6 +19,7 @@ public class Registry implements Node {
     private HashMap<Socket, TCPSender> registrySenders = null;
     private HashMap<String, TCPSender> registeredNodes = null;
     private OverlayCreator overlayCreator = null;
+    private ArrayList<TCPSender> registeredSendersCache = null;
     int numPreparedNodes = 0;
     int numCompletedNodes = 0;
 
@@ -81,17 +82,18 @@ public class Registry implements Node {
                     System.out.println("Currently only support 4 connections.");
                     continue;
                 }
-                Set<String> Nodes = registeredNodes.keySet();
-                // Clear preparred nodes
+                // Clear prepared nodes and completed nodes counter
                 numPreparedNodes = 0;
                 numCompletedNodes = 0;
+
+                Set<String> Nodes = registeredNodes.keySet();
                 // Get all TCPSenders
-                ArrayList<TCPSender> tcpSenders = new ArrayList<TCPSender>(registeredNodes.values());
+                registeredSendersCache = new ArrayList<TCPSender>(registeredNodes.values());
                 try {
                     MessagingNodesList messagingNodesList = new MessagingNodesList(Nodes);
                     byte[] data = messagingNodesList.getBytes();
                     // Send data using all tcpSenders
-                    for (TCPSender sender: tcpSenders)
+                    for (TCPSender sender: registeredSendersCache)
                         sender.sendData(data);
                 }
                 catch (IOException ioe)
@@ -111,12 +113,11 @@ public class Registry implements Node {
                 }
                 else
                 {
-                    ArrayList<TCPSender> tcpSenders = new ArrayList<TCPSender>(registeredNodes.values());
                     try {
                         LinkWeights linkWeights = new LinkWeights(overlayCreator.getNumLinks(), overlayCreator.formattedOverlay());
                         byte[] data = linkWeights.getBytes();
                         // Send data using all tcpSenders
-                        for (TCPSender sender: tcpSenders)
+                        for (TCPSender sender: registeredSendersCache)
                             sender.sendData(data);
                     }
                     catch (IOException ioe)
@@ -152,7 +153,7 @@ public class Registry implements Node {
                 try {
                     byte[] data = taskInitiate.getBytes();
 
-                    for (TCPSender sender: registeredNodes.values())
+                    for (TCPSender sender: registeredSendersCache)
                     {
                         sender.sendData(data);
                     }
@@ -403,7 +404,7 @@ public class Registry implements Node {
             try {
                 PullTrafficSummary pullTrafficSummary = new PullTrafficSummary();
                 byte[] data = pullTrafficSummary.getBytes();
-                for (TCPSender sender: registeredNodes.values())
+                for (TCPSender sender: registeredSendersCache)
                 {
                     sender.sendData(data);
                 }
