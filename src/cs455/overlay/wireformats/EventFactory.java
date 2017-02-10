@@ -85,6 +85,10 @@ public class EventFactory {
                 String IP_pc = new String(IP_pcBytes);
                 int port_pc = din.readInt();
                 return new PreparationComplete(IP_pc, port_pc);
+            case TASK_INITIATE:
+                // remaining format: int numRounds
+                int numRounds = din.readInt();
+                return new TaskInitiate(numRounds);
             default:
                 System.out.println("Invalid message type received.");
                 return null;

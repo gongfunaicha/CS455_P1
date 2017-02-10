@@ -5,6 +5,7 @@ import cs455.overlay.dijkstra.RoutingCache;
 import cs455.overlay.transport.TCPReceiverThread;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
+import cs455.overlay.util.CommunicationTracker;
 import cs455.overlay.wireformats.*;
 
 import java.io.BufferedReader;
@@ -27,6 +28,7 @@ public class MessagingNode implements Node {
     private int numLinks = 0;
     private String linkInfo = null;
     private RoutingCache routingCache = null;
+    private CommunicationTracker communicationTracker = null;
 
     @Override
     public void onEvent(Event e) {
@@ -47,6 +49,9 @@ public class MessagingNode implements Node {
                 break;
             case HANDSHAKE:
                 handleHandshake(e);
+                break;
+            case TASK_INITIATE:
+                handleTaskInitiate(e);
                 break;
             default:
                 System.out.println("Invalid event received.");
@@ -347,6 +352,21 @@ public class MessagingNode implements Node {
             System.out.println("Failed to send preparation complete message. Program will now exit.");
             System.exit(1);
         }
+    }
+
+    private void handleTaskInitiate(Event e)
+    {
+        int numRounds = ((TaskInitiate)e).getNumRounds();
+        //Initialize communication tracker
+        communicationTracker = new CommunicationTracker();
+        // Sleep for 3 seconds to let all communication tracker initialize
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e1) {
+            System.out.println("Interrupted when waiting for all communication tracker to initialize");
+        }
+
+        // TODO: Send out information
     }
 
 }

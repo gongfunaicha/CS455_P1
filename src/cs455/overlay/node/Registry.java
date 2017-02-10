@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class Registry implements Node {
 
@@ -125,7 +124,42 @@ public class Registry implements Node {
             }
             else if (userinput.startsWith("start "))
             {
-                // TODO: handle user input of "start"
+                if (numPreparedNodes != overlayCreator.getNumNodes())
+                {
+                    // Not all nodes are prepared
+                    System.out.println("Not all nodes are currently prepared. Not able to issue start command.");
+                    continue;
+                }
+
+                // get number of rounds
+                String strNum = userinput.substring(6);
+                int numRounds = 0;
+                try {
+                    numRounds = Integer.valueOf(strNum);
+                }
+                catch (NumberFormatException e)
+                {
+                    System.out.println("Number of rounds must be an integer.");
+                    continue;
+                }
+
+
+                TaskInitiate taskInitiate = new TaskInitiate(numRounds);
+
+                try {
+                    byte[] data = taskInitiate.getBytes();
+
+                    for (TCPSender sender: registeredNodes.values())
+                    {
+                        sender.sendData(data);
+                    }
+                }
+                catch (IOException ioe)
+                {
+                    System.out.println("Failed to send out task initiate command.");
+                    System.exit(1);
+                }
+
             }
             else if (userinput.equals("exit"))
             {
@@ -326,23 +360,6 @@ public class Registry implements Node {
         {
             // All nodes are prepared
             System.out.println("Received prepared information from all nodes.");
-            try {
-                System.out.println("5 seconds before issuing task initiate command");
-                TimeUnit.SECONDS.sleep(1);
-                System.out.println("4 seconds before issuing task initiate command");
-                TimeUnit.SECONDS.sleep(1);
-                System.out.println("3 seconds before issuing task initiate command");
-                TimeUnit.SECONDS.sleep(1);
-                System.out.println("2 seconds before issuing task initiate command");
-                TimeUnit.SECONDS.sleep(1);
-                System.out.println("1 seconds before issuing task initiate command");
-                TimeUnit.SECONDS.sleep(1);
-            }
-            catch (InterruptedException e1) {
-                System.out.println("Countdown was interrupted.");
-            }
-            System.out.println("Issuing task initiate command...");
-            // TODO: Send task initiate
         }
     }
 }
