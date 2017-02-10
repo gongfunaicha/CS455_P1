@@ -7,11 +7,11 @@ import cs455.overlay.wireformats.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InterfaceAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class Registry implements Node {
 
@@ -19,6 +19,7 @@ public class Registry implements Node {
     private HashMap<Socket, TCPSender> registrySenders = null;
     private HashMap<String, TCPSender> registeredNodes = null;
     private OverlayCreator overlayCreator = null;
+    int numPreparedNodes = 0;
 
     public Registry(int portnum)
     {
@@ -80,6 +81,8 @@ public class Registry implements Node {
                     continue;
                 }
                 Set<String> Nodes = registeredNodes.keySet();
+                // Clear preparred nodes
+                numPreparedNodes = 0;
                 // Get all TCPSenders
                 ArrayList<TCPSender> tcpSenders = new ArrayList<TCPSender>(registeredNodes.values());
                 try {
@@ -176,6 +179,9 @@ public class Registry implements Node {
                 break;
             case DEREGISTER_REQUEST:
                 handleDeregisterRequest(e);
+                break;
+            case PREPARATION_COMPLETE:
+                handlePreparationComplete(e);
                 break;
             default:
                 System.out.println("Invalid event received.");
@@ -310,6 +316,33 @@ public class Registry implements Node {
         catch (IOException e)
         {
             System.out.println("Failed to send deregister response.");
+        }
+    }
+
+    private synchronized void handlePreparationComplete(Event e)
+    {
+        numPreparedNodes++;
+        if (numPreparedNodes == overlayCreator.getNumNodes())
+        {
+            // All nodes are prepared
+            System.out.println("Received prepared information from all nodes.");
+            try {
+                System.out.println("5 seconds before issuing task initiate command");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("4 seconds before issuing task initiate command");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("3 seconds before issuing task initiate command");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("2 seconds before issuing task initiate command");
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("1 seconds before issuing task initiate command");
+                TimeUnit.SECONDS.sleep(1);
+            }
+            catch (InterruptedException e1) {
+                System.out.println("Countdown was interrupted.");
+            }
+            System.out.println("Issuing task initiate command...");
+            // TODO: Send task initiate
         }
     }
 }

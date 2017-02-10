@@ -1,5 +1,6 @@
 package cs455.overlay.dijkstra;
 
+import cs455.overlay.node.MessagingNode;
 import cs455.overlay.util.Link;
 
 import java.util.ArrayList;
@@ -14,8 +15,9 @@ public class NodeAndLink {
     private int numLinks = 0;
     private ArrayList<Link> linkInfo = null;
     private String currentNode = null;
+    private MessagingNode node = null;
 
-    public NodeAndLink(int numNodes, String stringNodes, int numLinks, String linkInfo, String currentNode)
+    public NodeAndLink(int numNodes, String stringNodes, int numLinks, String linkInfo, String currentNode, MessagingNode node)
     {
         this.numNodes = numNodes;
         this.numLinks = numLinks;
@@ -39,6 +41,7 @@ public class NodeAndLink {
             Link link = new Link(splitted[0],splitted[1],Integer.valueOf(splitted[2]));
             this.linkInfo.add(link);
         }
+        this.node = node;
     }
 
     public RoutingCache Dijkstra()
@@ -138,7 +141,7 @@ public class NodeAndLink {
         }
 
         // Finished dijkstra, create routing cache instance and return
-        return new RoutingCache(nodeRoute, finalCost, nextHop, nodesNeedToContact);
+        return new RoutingCache(nodeRoute, finalCost, nextHop, nodesNeedToContact, node);
     }
 
     private String findNodeWithSmallestCost(HashMap<String, Integer> currentNodeCost)

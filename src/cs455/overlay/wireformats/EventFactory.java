@@ -69,6 +69,22 @@ public class EventFactory {
                 din.readFully(linkInfoBytes, 0, len_linkInfo);
                 String linkInfo = new String(linkInfoBytes);
                 return new LinkWeights(numLinks, linkInfo);
+            case HANDSHAKE:
+                // remaining format: int len_IP, char[] IP, int port_num
+                int len_IP_hs = din.readInt();
+                byte[] IP_hsBytes = new byte[len_IP_hs];
+                din.readFully(IP_hsBytes,0,len_IP_hs);
+                String IP_hs = new String(IP_hsBytes);
+                int port_hs = din.readInt();
+                return new Handshake(IP_hs, port_hs, socket);
+            case PREPARATION_COMPLETE:
+                // remaining format: int len_IP, char[] IP, int port_num
+                int len_IP_pc = din.readInt();
+                byte[] IP_pcBytes = new byte[len_IP_pc];
+                din.readFully(IP_pcBytes,0,len_IP_pc);
+                String IP_pc = new String(IP_pcBytes);
+                int port_pc = din.readInt();
+                return new PreparationComplete(IP_pc, port_pc);
             default:
                 System.out.println("Invalid message type received.");
                 return null;

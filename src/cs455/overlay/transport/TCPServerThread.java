@@ -99,4 +99,9 @@ public class TCPServerThread extends Thread {
         return serverSocket;
     }
 
+    public synchronized void addReceiver(TCPReceiverThread receiver)
+    {
+        this.listTCPReceiverThread.add(receiver);
+    }
+
 }

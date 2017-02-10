@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 public class MessagingNode implements Node {
 
@@ -43,6 +44,9 @@ public class MessagingNode implements Node {
                 break;
             case LINK_WEIGHTS:
                 handleLinkWeights(e);
+                break;
+            case HANDSHAKE:
+                handleHandshake(e);
                 break;
             default:
                 System.out.println("Invalid event received.");
@@ -287,9 +291,62 @@ public class MessagingNode implements Node {
 
         // Do Dijkstra
         String currentNode = messagingNodeServerThread.getHostIP() + ":" + String.valueOf(messagingNodeServerThread.getPort());
-        NodeAndLink nodeAndLink = new NodeAndLink(this.numNodes, this.stringNodes, this.numLinks, this.linkInfo, currentNode);
+        NodeAndLink nodeAndLink = new NodeAndLink(this.numNodes, this.stringNodes, this.numLinks, this.linkInfo, currentNode, this);
         routingCache = nodeAndLink.Dijkstra();
 
-        // TODO: Connect the nodes need to connect
+        // Sleep 5 seconds before trying to start connection
+        try {
+            System.out.println("Dijkstra calculation complete, sleep five seconds before trying to reach out to neighbours");
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e1) {
+            System.out.println("Sleep interrupted.");
+        }
+
+        for (String node: routingCache.getNodesNeedToContact())
+        {
+            String[] splitted = node.split(":");
+            String IP = splitted[0];
+            int port = Integer.valueOf(splitted[1]);
+            try {
+                Socket senderSocket = new Socket(IP, port);
+
+                // Spawn receiver thread and create sender class
+                TCPReceiverThread receiverThread = new TCPReceiverThread(senderSocket, this);
+                this.messagingNodeServerThread.addReceiver(receiverThread);
+
+                routingCache.setSender(node, new TCPSender(senderSocket));
+            } catch (IOException e1) {
+                System.out.println("Failed to connect to neighbour. Program will now exit.");
+                System.exit(1);
+            }
+        }
     }
+
+    private void handleHandshake(Event e)
+    {
+        Handshake handshake = (Handshake)e;
+        String IP = handshake.getIP();
+        int port = handshake.getPort();
+        Socket socket = handshake.getSocket();
+
+        // Add IP:Port and socket pair to routing cache
+        String identity = IP + ":" + String.valueOf(port);
+        try {
+            routingCache.setSender(identity, new TCPSender(socket));
+        } catch (IOException e1) {
+            System.out.println("Failed to set sender.");
+        }
+    }
+
+    public void sendPreparationComplete()
+    {
+        PreparationComplete preparationComplete = new PreparationComplete(messagingNodeServerThread.getHostIP(), messagingNodeServerThread.getPort());
+        try {
+            registrySender.sendData(preparationComplete.getBytes());
+        } catch (IOException e) {
+            System.out.println("Failed to send preparation complete message. Program will now exit.");
+            System.exit(1);
+        }
+    }
+
 }
