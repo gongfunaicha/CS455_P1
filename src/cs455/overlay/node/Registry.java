@@ -326,6 +326,12 @@ public class Registry implements Node {
         int port = deregisterRequest.getPort();
         Socket requesterSocket = deregisterRequest.getRequesterSocket();
         System.out.println("Got deregister request from IP: " + IP + " Port: " + String.valueOf(port) + ".");
+        if (overlayCreator != null)
+        {
+            System.out.println("Overlay was reset due to deregistration of a messaging node.");
+            overlayCreator = null;
+        }
+
         try {
             if (!registrySenders.containsKey(requesterSocket))
             {
