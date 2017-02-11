@@ -89,9 +89,8 @@ public class Registry implements Node {
                     System.out.println("Currently only support 4 connections.");
                     continue;
                 }
-                // Clear prepared nodes and completed nodes counter
+                // Clear prepared nodes
                 numPreparedNodes = 0;
-                numCompletedNodes = 0;
 
                 Set<String> Nodes = registeredNodes.keySet();
                 // Get all TCPSenders
@@ -147,6 +146,7 @@ public class Registry implements Node {
                     continue;
                 }
 
+
                 // get number of rounds
                 String strNum = userinput.substring(6);
                 int numRounds = 0;
@@ -159,6 +159,8 @@ public class Registry implements Node {
                     continue;
                 }
 
+                // Clear completed node counter
+                numCompletedNodes = 0;
 
                 TaskInitiate taskInitiate = new TaskInitiate(numRounds);
 

@@ -77,6 +77,13 @@ public class MessagingNode implements Node {
         // Connect registry
         connectRegistry();
 
+        // Wait quarter a second before sending register request
+        try {
+            TimeUnit.MILLISECONDS.sleep(250);
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted when waiting to send register request.");
+        }
+
         // Send register request
         sendRegisterRequest();
 
@@ -96,7 +103,14 @@ public class MessagingNode implements Node {
             }
             if (userinput.equals("print-shortest-path"))
             {
-                // TODO: handle user input of "print-shortest-path"
+                if (routingCache == null)
+                {
+                    System.out.println("Dijkstra process has not completed. Cannot print shorest path.");
+                }
+                else
+                {
+                    System.out.println(routingCache.getShortestPaths());
+                }
             }
             else if (userinput.equals("exit-overlay"))
             {
@@ -338,6 +352,7 @@ public class MessagingNode implements Node {
 
                 // Spawn receiver thread and create sender class
                 TCPReceiverThread receiverThread = new TCPReceiverThread(senderSocket, this);
+                receiverThread.start();
                 this.messagingNodeServerThread.addReceiver(receiverThread);
 
                 routingCache.setSender(node, senderSocketSender);
@@ -381,6 +396,8 @@ public class MessagingNode implements Node {
 
     private void handleTaskInitiate(Event e)
     {
+        System.out.println("Received task initiate message.");
+
         int numRounds = ((TaskInitiate)e).getNumRounds();
         //Initialize communication tracker
         communicationTracker = new CommunicationTracker();
