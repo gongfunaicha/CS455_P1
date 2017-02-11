@@ -315,6 +315,18 @@ public class MessagingNode implements Node {
             System.out.println("Sleep interrupted.");
         }
 
+        byte[] data = null;
+
+        try {
+            // Send handshake message
+            Handshake handshake = new Handshake(messagingNodeServerThread.getHostIP(),messagingNodeServerThread.getPort());
+            data = handshake.getBytes();
+        }
+        catch (IOException ioe)
+        {
+            System.out.println("Failed to generate handshake message. Program will now exit.");
+            System.exit(1);
+        }
         for (String node: routingCache.getNodesNeedToContact())
         {
             String[] splitted = node.split(":");
@@ -322,12 +334,17 @@ public class MessagingNode implements Node {
             int port = Integer.valueOf(splitted[1]);
             try {
                 Socket senderSocket = new Socket(IP, port);
+                TCPSender senderSocketSender = new TCPSender(senderSocket);
 
                 // Spawn receiver thread and create sender class
                 TCPReceiverThread receiverThread = new TCPReceiverThread(senderSocket, this);
                 this.messagingNodeServerThread.addReceiver(receiverThread);
 
-                routingCache.setSender(node, new TCPSender(senderSocket));
+                routingCache.setSender(node, senderSocketSender);
+
+                // Send handshake message
+                senderSocketSender.sendData(data);
+
             } catch (IOException e1) {
                 System.out.println("Failed to connect to neighbour. Program will now exit.");
                 System.exit(1);

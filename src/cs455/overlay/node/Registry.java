@@ -64,7 +64,12 @@ public class Registry implements Node {
             }
             else if (userinput.equals("list-weights"))
             {
-                // TODO: handle user input of "list-weights"
+                if (overlayCreator == null)
+                {
+                    System.out.println("Haven't setup overlay. Cannot list weights.");
+                    continue;
+                }
+                System.out.println(overlayCreator.formattedOverlay());
             }
             else if (userinput.startsWith("setup-overlay "))
             {
@@ -130,6 +135,11 @@ public class Registry implements Node {
             }
             else if (userinput.startsWith("start "))
             {
+                if (overlayCreator == null)
+                {
+                    System.out.println("Haven't created overlay. Cannot start.");
+                    continue;
+                }
                 if (numPreparedNodes != overlayCreator.getNumNodes())
                 {
                     // Not all nodes are prepared

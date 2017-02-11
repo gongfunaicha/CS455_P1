@@ -30,14 +30,14 @@ public class OverlayCreator {
         // First connect adjacent nodes
         for (int i = 0; i < numNodes; i++)
         {
-            Link link = new Link(Nodes.get(i % numNodes), Nodes.get((i+1) % numNodes), random.nextInt(10) + 1);
+            Link link = new Link(Nodes.get(i % numNodes), Nodes.get((i+1) % numNodes), random.nextInt(10) + 1, true);
             links.add(link);
         }
 
         // Next connect nodes adjacent by 1
         for (int i = 0; i < numNodes; i++)
         {
-            Link link = new Link(Nodes.get(i % numNodes), Nodes.get((i+2) % numNodes), random.nextInt(10) + 1);
+            Link link = new Link(Nodes.get(i % numNodes), Nodes.get((i+2) % numNodes), random.nextInt(10) + 1, true);
             links.add(link);
         }
 

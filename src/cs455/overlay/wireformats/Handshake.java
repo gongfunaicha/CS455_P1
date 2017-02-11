@@ -11,13 +11,13 @@ public class Handshake implements Event{
     private int port = 0;
     private Socket socket = null;
 
-    Handshake(String IPAddr, int portnum)
+    public Handshake(String IPAddr, int portnum)
     {
         IP = IPAddr;
         port = portnum;
     }
 
-    Handshake(String IPAddr, int portnum, Socket socket)
+    public Handshake(String IPAddr, int portnum, Socket socket)
     {
         IP = IPAddr;
         port = portnum;

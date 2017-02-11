@@ -5,12 +5,15 @@ public class Link {
     private String dest = null;
     private int cost = 0;
 
-    public Link(String src, String dest, int cost)
+    public Link(String src, String dest, int cost, boolean print)
     {
         this.src = src;
         this.dest = dest;
         this.cost = cost;
-        System.out.println("Created link between " + src + " and " + dest + " with cost " + String.valueOf(cost));
+        if (print)
+        {
+            System.out.println("Created link between " + src + " and " + dest + " with cost " + String.valueOf(cost));
+        }
     }
 
     public String getSrc()

@@ -38,7 +38,7 @@ public class NodeAndLink {
         {
             // Separate src, dest, and cost
             String[] splitted = Link.split(" ");
-            Link link = new Link(splitted[0],splitted[1],Integer.valueOf(splitted[2]));
+            Link link = new Link(splitted[0],splitted[1],Integer.valueOf(splitted[2]), false);
             this.linkInfo.add(link);
         }
         this.node = node;
