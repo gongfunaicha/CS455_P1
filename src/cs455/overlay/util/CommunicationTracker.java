@@ -40,4 +40,29 @@ public class CommunicationTracker {
     {
         receiveSummation += num;
     }
+
+    public int getSendTracker()
+    {
+        return sendTracker;
+    }
+
+    public int getReceiveTracker()
+    {
+        return receiveTracker;
+    }
+
+    public int getRelayTracker()
+    {
+        return relayTracker;
+    }
+
+    public long getSendSummation()
+    {
+        return sendSummation;
+    }
+
+    public long getReceiveSummation()
+    {
+        return receiveSummation;
+    }
 }

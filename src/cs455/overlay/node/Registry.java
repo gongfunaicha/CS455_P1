@@ -2,6 +2,7 @@ package cs455.overlay.node;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.util.OverlayCreator;
+import cs455.overlay.util.StatisticsCollectorAndDisplay;
 import cs455.overlay.wireformats.*;
 
 import java.io.BufferedReader;
@@ -20,6 +21,7 @@ public class Registry implements Node {
     private HashMap<String, TCPSender> registeredNodes = null;
     private OverlayCreator overlayCreator = null;
     private ArrayList<TCPSender> registeredSendersCache = null;
+    private StatisticsCollectorAndDisplay statisticsCollectorAndDisplay = null;
     int numPreparedNodes = 0;
     int numCompletedNodes = 0;
 
@@ -224,6 +226,9 @@ public class Registry implements Node {
             case TASK_COMPLETE:
                 handleTaskComplete(e);
                 break;
+            case TRAFFIC_SUMMARY:
+                handleTrafficSummary(e);
+                break;
             default:
                 System.out.println("Invalid event received.");
         }
@@ -402,6 +407,9 @@ public class Registry implements Node {
             }
 
             try {
+                // Initialize statisticsCollectorAndDisplay
+                statisticsCollectorAndDisplay = new StatisticsCollectorAndDisplay(overlayCreator.getNumNodes());
+
                 PullTrafficSummary pullTrafficSummary = new PullTrafficSummary();
                 byte[] data = pullTrafficSummary.getBytes();
                 for (TCPSender sender: registeredSendersCache)
@@ -415,5 +423,11 @@ public class Registry implements Node {
                 System.exit(1);
             }
         }
+    }
+
+    private void handleTrafficSummary(Event e)
+    {
+        TrafficSummary trafficSummary = (TrafficSummary)e;
+        statisticsCollectorAndDisplay.addTrafficSummary(trafficSummary);
     }
 }

@@ -455,7 +455,17 @@ public class MessagingNode implements Node {
 
     private void handlePullTrafficSummary(Event e)
     {
-        // TODO: handle Pull Traffic Summary message
+        String identity = messagingNodeServerThread.getHostIP() + ":" + String.valueOf(messagingNodeServerThread.getPort());
+        TrafficSummary trafficSummary = new TrafficSummary(communicationTracker.getSendTracker(),communicationTracker.getReceiveTracker(), communicationTracker.getRelayTracker(), communicationTracker.getSendSummation(), communicationTracker.getReceiveSummation(),identity);
+        try {
+            byte[] data = trafficSummary.getBytes();
+            registrySender.sendData(data);
+        }
+        catch (IOException ioe)
+        {
+            System.out.println("Failed to send traffic summary to registry. Program will now exit.");
+            System.exit(1);
+        }
     }
 
 }

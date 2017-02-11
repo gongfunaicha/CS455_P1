@@ -111,6 +111,18 @@ public class EventFactory {
                 return new TaskComplete(IP_tc, port_tc);
             case PULL_TRAFFIC_SUMMARY:
                 return new PullTrafficSummary();
+            case TRAFFIC_SUMMARY:
+                // remaining format: int len_identity, String identity, int sendTracker, int receiveTracker, int relayTracker, long sendSummation, long receiveSummation
+                int len_identity = din.readInt();
+                byte[] identityBytes = new byte[len_identity];
+                din.readFully(identityBytes,0,len_identity);
+                String identity = new String(identityBytes);
+                int sendTracker = din.readInt();
+                int receiveTracker = din.readInt();
+                int relayTracker = din.readInt();
+                long sendSummation = din.readLong();
+                long receiveSummation = din.readLong();
+                return new TrafficSummary(sendTracker, receiveTracker, relayTracker, sendSummation, receiveSummation, identity);
             default:
                 System.out.println("Invalid message type received.");
                 return null;
