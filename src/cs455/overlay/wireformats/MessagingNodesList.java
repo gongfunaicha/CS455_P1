@@ -4,14 +4,14 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Set;
+import java.util.ArrayList;
 
 public class MessagingNodesList implements Event{
 
     private int numNodes = 0;
     private String stringNodes = null;
 
-    public MessagingNodesList(Set<String> Nodes)
+    public MessagingNodesList(ArrayList<String> Nodes)
     {
         stringNodes = "";
         for (String Node: Nodes)

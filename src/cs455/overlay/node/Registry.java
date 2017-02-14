@@ -97,24 +97,27 @@ public class Registry implements Node {
                 // Clear prepared nodes
                 numPreparedNodes = 0;
 
-                Set<String> Nodes = registeredNodes.keySet();
-                // Get all TCPSenders
-                registeredSendersCache = new ArrayList<TCPSender>(registeredNodes.values());
-                try {
-                    MessagingNodesList messagingNodesList = new MessagingNodesList(Nodes);
-                    byte[] data = messagingNodesList.getBytes();
-                    // Send data using all tcpSenders
-                    for (TCPSender sender: registeredSendersCache)
-                        sender.sendData(data);
-                }
-                catch (IOException ioe)
-                {
-                    System.out.println("Failed to send out messaging node list.");
-                    continue;
-                }
                 // Start creating overlay
+                Set<String> Nodes = registeredNodes.keySet();
+                registeredSendersCache = new ArrayList<>(registeredNodes.values());
                 overlayCreator = new OverlayCreator(Nodes);
                 overlayCreator.createOverlay();
+
+                // Start to send of list of nodes need to connect
+                for (String Node: Nodes)
+                {
+                    ArrayList<String> nodesNeedToConnect = overlayCreator.getNeedToConnect(Node);
+                    try {
+                        MessagingNodesList messagingNodesList = new MessagingNodesList(nodesNeedToConnect);
+                        registeredNodes.get(Node).sendData(messagingNodesList.getBytes());
+                    }
+                    catch (IOException ioe)
+                    {
+                        System.out.println("Failed to send out messaging node list.");
+                        System.exit(1);
+                    }
+                }
+
             }
             else if (userinput.equals("send-overlay-link-weights"))
             {

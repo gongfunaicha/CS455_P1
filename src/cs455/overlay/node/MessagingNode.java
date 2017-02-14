@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -25,12 +26,11 @@ public class MessagingNode implements Node {
     private TCPReceiverThread registryReceiver = null;
     private boolean shortestPathCalculated = false;
     private boolean sentDeregisterRequest = false;
-    private int numNodes = 0;
-    private String stringNodes = null;
     private int numLinks = 0;
     private String linkInfo = null;
     private RoutingCache routingCache = null;
     private CommunicationTracker communicationTracker = null;
+    private HashMap<String, TCPSender> senders = null;
 
     @Override
     public void onEvent(Event e) {
@@ -306,25 +306,20 @@ public class MessagingNode implements Node {
     private void handleMessagingNodesList(Event e)
     {
         MessagingNodesList messagingNodesList = (MessagingNodesList)e;
-        this.numNodes = messagingNodesList.getNumNodes();
-        this.stringNodes = messagingNodesList.getStringNodes();
-    }
+        int numNodes = messagingNodesList.getNumNodes();
+        String stringNodes = messagingNodesList.getStringNodes();
+        this.senders = new HashMap<>();
+        ArrayList<String> listNodesNeedToContact = new ArrayList<>();
+        String[] nodesNeedToContact = stringNodes.split("\\n");
+        for (String node: nodesNeedToContact)
+        {
+            listNodesNeedToContact.add(node);
+        }
 
-    private void handleLinkWeights(Event e)
-    {
-        LinkWeights linkWeights = (LinkWeights)e;
-        this.numLinks = linkWeights.getNumLinks();
-        this.linkInfo = linkWeights.getLinkInfo();
-
-        // Do Dijkstra
-        String currentNode = messagingNodeServerThread.getHostIP() + ":" + String.valueOf(messagingNodeServerThread.getPort());
-        NodeAndLink nodeAndLink = new NodeAndLink(this.numNodes, this.stringNodes, this.numLinks, this.linkInfo, currentNode, this);
-        routingCache = nodeAndLink.Dijkstra();
-
-        // Sleep 5 seconds before trying to start connection
+        // Wait three seconds before sending out handshake
         try {
-            System.out.println("Dijkstra calculation complete, sleep five seconds before trying to reach out to neighbours");
-            TimeUnit.SECONDS.sleep(5);
+            System.out.println("Received nodes need to connect. Wait for three seconds before trying to contact.");
+            TimeUnit.SECONDS.sleep(3);
         } catch (InterruptedException e1) {
             System.out.println("Sleep interrupted.");
         }
@@ -341,7 +336,7 @@ public class MessagingNode implements Node {
             System.out.println("Failed to generate handshake message. Program will now exit.");
             System.exit(1);
         }
-        for (String node: routingCache.getNodesNeedToContact())
+        for (String node: listNodesNeedToContact)
         {
             String[] splitted = node.split(":");
             String IP = splitted[0];
@@ -355,7 +350,7 @@ public class MessagingNode implements Node {
                 receiverThread.start();
                 this.messagingNodeServerThread.addReceiver(receiverThread);
 
-                routingCache.setSender(node, senderSocketSender);
+                setSender(node, senderSocketSender);
 
                 // Send handshake message
                 senderSocketSender.sendData(data);
@@ -365,6 +360,22 @@ public class MessagingNode implements Node {
                 System.exit(1);
             }
         }
+    }
+
+    private void handleLinkWeights(Event e)
+    {
+        LinkWeights linkWeights = (LinkWeights)e;
+        this.numLinks = linkWeights.getNumLinks();
+        this.linkInfo = linkWeights.getLinkInfo();
+
+        // Do Dijkstra
+        String currentNode = messagingNodeServerThread.getHostIP() + ":" + String.valueOf(messagingNodeServerThread.getPort());
+        NodeAndLink nodeAndLink = new NodeAndLink(this.numLinks, this.linkInfo, currentNode, this, senders);
+        routingCache = nodeAndLink.Dijkstra();
+
+        // Send prepration complete
+        sendPreparationComplete();
+        System.out.println("Link weights are received and processed. Ready to send messages.");
     }
 
     private void handleHandshake(Event e)
@@ -377,7 +388,7 @@ public class MessagingNode implements Node {
         // Add IP:Port and socket pair to routing cache
         String identity = IP + ":" + String.valueOf(port);
         try {
-            routingCache.setSender(identity, new TCPSender(socket));
+            setSender(identity, new TCPSender(socket));
         } catch (IOException e1) {
             System.out.println("Failed to set sender.");
         }
@@ -445,6 +456,7 @@ public class MessagingNode implements Node {
             TaskComplete taskComplete = new TaskComplete(messagingNodeServerThread.getHostIP(), messagingNodeServerThread.getPort());
             byte[] data = taskComplete.getBytes();
             registrySender.sendData(data);
+            System.out.println("Task completed.");
         }
         catch (IOException ioe)
         {
@@ -499,6 +511,15 @@ public class MessagingNode implements Node {
         {
             System.out.println("Failed to send traffic summary to registry. Program will now exit.");
             System.exit(1);
+        }
+    }
+
+    private synchronized void setSender(String dest, TCPSender sender)
+    {
+        senders.put(dest, sender);
+        if (senders.size() == 4)
+        {
+            System.out.println("All connections are established. Number of connections: " + String.valueOf(senders.size()));
         }
     }
 

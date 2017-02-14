@@ -1,10 +1,12 @@
 package cs455.overlay.dijkstra;
 
 import cs455.overlay.node.MessagingNode;
+import cs455.overlay.transport.TCPSender;
 import cs455.overlay.util.Link;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 // NodeAndLink is used to store nodes and links, and do dijkstra
@@ -16,21 +18,15 @@ public class NodeAndLink {
     private ArrayList<Link> linkInfo = null;
     private String currentNode = null;
     private MessagingNode node = null;
+    private HashMap<String, TCPSender> senders = null;
 
-    public NodeAndLink(int numNodes, String stringNodes, int numLinks, String linkInfo, String currentNode, MessagingNode node)
+    public NodeAndLink(int numLinks, String linkInfo, String currentNode, MessagingNode node, HashMap<String, TCPSender> senders)
     {
-        this.numNodes = numNodes;
         this.numLinks = numLinks;
         this.currentNode = currentNode;
 
-        // Decode stringNodes
-        this.Nodes = new ArrayList<>();
-        String[] splittedNodes = stringNodes.split("\\n");
-        for (String Node: splittedNodes)
-        {
-            Nodes.add(Node);
-        }
 
+        HashSet<String> setNodes = new HashSet<>();
         // Decode linkInfo
         this.linkInfo = new ArrayList<>();
         String[] splittedLinks = linkInfo.split("\\n");
@@ -40,8 +36,16 @@ public class NodeAndLink {
             String[] splitted = Link.split(" ");
             Link link = new Link(splitted[0],splitted[1],Integer.valueOf(splitted[2]), false);
             this.linkInfo.add(link);
+            // Add node to setNodes
+            setNodes.add(splitted[0]);
+            setNodes.add(splitted[1]);
         }
         this.node = node;
+
+        Nodes = new ArrayList<>(setNodes);
+        numNodes = setNodes.size();
+
+        this.senders = senders;
     }
 
     public RoutingCache Dijkstra()
@@ -54,7 +58,6 @@ public class NodeAndLink {
         HashMap<String, Integer> currentNodeCost = new HashMap<>(); // Not yet final
         HashMap<String, Integer> finalCost = new HashMap<>(); // Only final
         HashMap<String, String> nextHop = new HashMap<>();
-        ArrayList<String> nodesNeedToContact = new ArrayList<>();
 
         for (String Node: this.Nodes)
         {
@@ -87,7 +90,6 @@ public class NodeAndLink {
             if (src.equals(currentNode))
             {
                 // Need to add to nodes need to contact
-                nodesNeedToContact.add(dest);
             }
         }
 
@@ -141,7 +143,7 @@ public class NodeAndLink {
         }
 
         // Finished dijkstra, create routing cache instance and return
-        return new RoutingCache(nodeRoute, finalCost, nextHop, nodesNeedToContact, node);
+        return new RoutingCache(nodeRoute, finalCost, nextHop, node, senders);
     }
 
     private String findNodeWithSmallestCost(HashMap<String, Integer> currentNodeCost)

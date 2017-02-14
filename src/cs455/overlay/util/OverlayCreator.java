@@ -44,6 +44,7 @@ public class OverlayCreator {
         this.numLinks = links.size();
 
         System.out.println("Overlay creation complete. Number of links: " + String.valueOf(this.numLinks));
+        System.out.println("Please wait at least 5 seconds before issuing send-overlay-link-weights due to messaging nodes are connecting to each other.");
     }
 
     // Return formatted links
@@ -70,6 +71,19 @@ public class OverlayCreator {
     public int getNumNodes()
     {
         return numNodes;
+    }
+
+    public ArrayList<String> getNeedToConnect(String src)
+    {
+        ArrayList<String> nodesNeedToConnect = new ArrayList<>();
+        for (Link link: links)
+        {
+            if (link.getSrc().equals(src))
+            {
+                nodesNeedToConnect.add(link.getDest());
+            }
+        }
+        return nodesNeedToConnect;
     }
 
 }

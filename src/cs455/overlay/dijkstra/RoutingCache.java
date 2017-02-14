@@ -11,18 +11,17 @@ public class RoutingCache {
     private HashMap<String, String> nodeRoute = null;
     private HashMap<String, Integer> finalCost = null;
     private HashMap<String, String> nextHop = null;
-    private ArrayList<String> nodesNeedToContact = null;
     private HashMap<String, TCPSender> senders = null;
     private MessagingNode node = null;
 
-    RoutingCache(HashMap<String, String> nodeRoute, HashMap<String, Integer> finalCost, HashMap<String, String> nextHop, ArrayList<String> nodesNeedToContact, MessagingNode node)
+    RoutingCache(HashMap<String, String> nodeRoute, HashMap<String, Integer> finalCost, HashMap<String, String> nextHop, MessagingNode node, HashMap<String, TCPSender> senders)
     {
         this.nodeRoute = nodeRoute;
         this.finalCost = finalCost;
         this.nextHop = nextHop;
-        this.nodesNeedToContact = nodesNeedToContact;
         this.senders = new HashMap<>();
         this.node = node;
+        this.senders = senders;
     }
 
     public String getNextHop(String dest)
@@ -30,23 +29,9 @@ public class RoutingCache {
         return nextHop.get(dest);
     }
 
-    public ArrayList<String> getNodesNeedToContact()
-    {
-        return nodesNeedToContact;
-    }
-
     public TCPSender getSender(String dest)
     {
         return senders.get(dest);
-    }
-
-    public synchronized void setSender(String dest, TCPSender sender)
-    {
-        senders.put(dest, sender);
-        if (senders.size() == 4)
-        {
-            node.sendPreparationComplete();
-        }
     }
 
     public String getShortestPaths()
