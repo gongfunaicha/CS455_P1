@@ -89,6 +89,11 @@ public class Registry implements Node {
                     System.out.println("Currently only support 4 connections.");
                     continue;
                 }
+                if (registeredNodes.size() < 10)
+                {
+                    System.out.println("Setup overlay requires at least 10 messaging nodes.");
+                    continue;
+                }
                 // Clear prepared nodes
                 numPreparedNodes = 0;
 
@@ -263,7 +268,13 @@ public class Registry implements Node {
         // Duplicate entry, send failure response
         if (registrySenders.containsKey(requesterSocket))
         {
-            sendRegisterResponse(registrySenders.get(requesterSocket),false,"Node had previously registered.");
+            try {
+                sendRegisterResponse(registrySenders.get(requesterSocket),false,"Node had previously registered.");
+            }
+            catch (IOException e1)
+            {
+                System.out.println("Link broken before registration response is sent.");
+            }
             return;
         }
 
@@ -272,7 +283,13 @@ public class Registry implements Node {
             // First check whether it has registered
             if (registeredNodes.containsKey(full_identity))
             {
-                sendRegisterResponse(registeredNodes.get(full_identity),false,"Node had previously registered.");
+                try {
+                    sendRegisterResponse(registeredNodes.get(full_identity),false,"Node had previously registered.");
+                }
+                catch (IOException e1)
+                {
+                    System.out.println("Link broken before registration response is sent.");
+                }
                 return;
             }
 
@@ -287,13 +304,28 @@ public class Registry implements Node {
                 registeredNodes.put(full_identity, sender);
 
                 // Then send register success
-                sendRegisterResponse(sender, true, "Registration request successful. The number of messaging nodes currently constituting the overlay is " + String.valueOf(registeredNodes.size()) + ".");
+                try {
+                    sendRegisterResponse(sender, true, "Registration request successful. The number of messaging nodes currently constituting the overlay is " + String.valueOf(registeredNodes.size()) + ".");
+                }
+                catch (IOException e1)
+                {
+                    System.out.println("Link broken before registration response is sent. Removing the messaging node from list.");
+                    registrySenders.remove(requesterSocket);
+                    registeredNodes.remove(full_identity);
+
+                }
             }
             else
             {
                 // Not honest
                 System.out.println(requesterSocket.getInetAddress().getHostAddress());
-                sendRegisterResponse(sender,false,"IP mismatch.");
+                try {
+                    sendRegisterResponse(sender,false,"IP mismatch.");
+                }
+                catch (IOException e1)
+                {
+                    System.out.println("Link broken before registration response is sent.");
+                }
             }
 
 
@@ -304,7 +336,7 @@ public class Registry implements Node {
 
     }
 
-    private void sendRegisterResponse(TCPSender sender, boolean status, String addiinfo)
+    private void sendRegisterResponse(TCPSender sender, boolean status, String addiinfo) throws IOException
     {
         try {
             RegisterResponse registerResponse = new RegisterResponse(status, addiinfo);
