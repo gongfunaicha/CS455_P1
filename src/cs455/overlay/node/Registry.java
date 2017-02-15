@@ -22,6 +22,7 @@ public class Registry implements Node {
     private OverlayCreator overlayCreator = null;
     private ArrayList<TCPSender> registeredSendersCache = null;
     private StatisticsCollectorAndDisplay statisticsCollectorAndDisplay = null;
+    private final Object registerDeregisterLock = new Object();
     int numPreparedNodes = 0;
     int numCompletedNodes = 0;
 
@@ -269,26 +270,13 @@ public class Registry implements Node {
         int port = registerRequest.getPort();
         System.out.println("Got register request from IP: " + IP + " Port: " + String.valueOf(port) + ".");
 
-        // Duplicate entry, send failure response
-        if (registrySenders.containsKey(requesterSocket))
+        synchronized (registerDeregisterLock)
         {
-            try {
-                sendRegisterResponse(registrySenders.get(requesterSocket),false,"Node had previously registered.");
-            }
-            catch (IOException e1)
-            {
-                System.out.println("Link broken before registration response is sent.");
-            }
-            return;
-        }
-
-        try {
-            String full_identity = IP + ":" + port;
-            // First check whether it has registered
-            if (registeredNodes.containsKey(full_identity))
+            // Duplicate entry, send failure response
+            if (registrySenders.containsKey(requesterSocket))
             {
                 try {
-                    sendRegisterResponse(registeredNodes.get(full_identity),false,"Node had previously registered.");
+                    sendRegisterResponse(registrySenders.get(requesterSocket),false,"Node had previously registered.");
                 }
                 catch (IOException e1)
                 {
@@ -297,46 +285,61 @@ public class Registry implements Node {
                 return;
             }
 
-            // Contains no entry in registrySenders and registeredNodes, create TCPSender instance
-            TCPSender sender = new TCPSender(requesterSocket);
-
-            // Check whether it is honest, if 127.0.0.1 check whether it claims to have the same IP as registry
-            if (IP.equals(requesterSocket.getInetAddress().getHostAddress()) || (requesterSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && registryServerThread.getHostIP().equals(IP)))
-            {
-                // Honest, add to registrySenders and registeredNodes
-                registrySenders.put(requesterSocket, sender);
-                registeredNodes.put(full_identity, sender);
-
-                // Then send register success
-                try {
-                    sendRegisterResponse(sender, true, "Registration request successful. The number of messaging nodes currently constituting the overlay is " + String.valueOf(registeredNodes.size()) + ".");
-                }
-                catch (IOException e1)
+            try {
+                String full_identity = IP + ":" + port;
+                // First check whether it has registered
+                if (registeredNodes.containsKey(full_identity))
                 {
-                    System.out.println("Link broken before registration response is sent. Removing the messaging node from list.");
-                    registrySenders.remove(requesterSocket);
-                    registeredNodes.remove(full_identity);
+                    try {
+                        sendRegisterResponse(registeredNodes.get(full_identity),false,"Node had previously registered.");
+                    }
+                    catch (IOException e1)
+                    {
+                        System.out.println("Link broken before registration response is sent.");
+                    }
+                    return;
+                }
 
-                }
-            }
-            else
-            {
-                // Not honest
-                System.out.println(requesterSocket.getInetAddress().getHostAddress());
-                try {
-                    sendRegisterResponse(sender,false,"IP mismatch.");
-                }
-                catch (IOException e1)
+                // Contains no entry in registrySenders and registeredNodes, create TCPSender instance
+                TCPSender sender = new TCPSender(requesterSocket);
+
+                // Check whether it is honest, if 127.0.0.1 check whether it claims to have the same IP as registry
+                if (IP.equals(requesterSocket.getInetAddress().getHostAddress()) || (requesterSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && registryServerThread.getHostIP().equals(IP)))
                 {
-                    System.out.println("Link broken before registration response is sent.");
+                    // Honest, add to registrySenders and registeredNodes
+                    registrySenders.put(requesterSocket, sender);
+                    registeredNodes.put(full_identity, sender);
+
+                    // Then send register success
+                    try {
+                        sendRegisterResponse(sender, true, "Registration request successful. The number of messaging nodes currently constituting the overlay is " + String.valueOf(registeredNodes.size()) + ".");
+                    }
+                    catch (IOException e1)
+                    {
+                        System.out.println("Link broken before registration response is sent. Removing the messaging node from list.");
+                        registrySenders.remove(requesterSocket);
+                        registeredNodes.remove(full_identity);
+
+                    }
                 }
+                else
+                {
+                    // Not honest
+                    System.out.println(requesterSocket.getInetAddress().getHostAddress());
+                    try {
+                        sendRegisterResponse(sender,false,"IP mismatch.");
+                    }
+                    catch (IOException e1)
+                    {
+                        System.out.println("Link broken before registration response is sent.");
+                    }
+                }
+
+
+            } catch (IOException ioe) {
+                System.out.print("Failed to create TCP Sender instance.");
             }
-
-
-        } catch (IOException ioe) {
-            System.out.print("Failed to create TCP Sender instance.");
         }
-
 
     }
 
@@ -362,48 +365,52 @@ public class Registry implements Node {
         int port = deregisterRequest.getPort();
         Socket requesterSocket = deregisterRequest.getRequesterSocket();
         System.out.println("Got deregister request from IP: " + IP + " Port: " + String.valueOf(port) + ".");
-        if (overlayCreator != null)
+
+        synchronized (registerDeregisterLock)
         {
-            System.out.println("Overlay was reset due to deregistration of a messaging node.");
-            overlayCreator = null;
-        }
-
-        try {
-            if (!registrySenders.containsKey(requesterSocket))
+            if (overlayCreator != null)
             {
-                // Previously not registered, send failure message
-                // First create TCPSender
-                TCPSender sender = new TCPSender(requesterSocket);
-                sendDeregisterResponse(sender, false, "Node was not previously registered.");
-                return;
+                System.out.println("Overlay was reset due to deregistration of a messaging node.");
+                overlayCreator = null;
             }
 
-            // requesterSocket contained in registrySenders, check full identity in registeredNodes
-            String fullIdentity = IP + ":" + String.valueOf(port);
-            if (!registeredNodes.containsKey(fullIdentity))
-            {
-                // Previously not registered, send failure message
-                sendDeregisterResponse(registrySenders.get(requesterSocket), false, "Node was not previously registered.");
-                return;
-            }
+            try {
+                if (!registrySenders.containsKey(requesterSocket))
+                {
+                    // Previously not registered, send failure message
+                    // First create TCPSender
+                    TCPSender sender = new TCPSender(requesterSocket);
+                    sendDeregisterResponse(sender, false, "Node was not previously registered.");
+                    return;
+                }
 
-            // Previously registered, check whether it is honest
-            if (!(IP.equals(requesterSocket.getInetAddress().getHostAddress()) || (requesterSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && registryServerThread.getHostIP().equals(IP))))
-            {
-                // Not honest, send failure message
-                sendDeregisterResponse(registrySenders.get(requesterSocket), false, "Claimed false IP address.");
-                return;
-            }
+                // requesterSocket contained in registrySenders, check full identity in registeredNodes
+                String fullIdentity = IP + ":" + String.valueOf(port);
+                if (!registeredNodes.containsKey(fullIdentity))
+                {
+                    // Previously not registered, send failure message
+                    sendDeregisterResponse(registrySenders.get(requesterSocket), false, "Node was not previously registered.");
+                    return;
+                }
 
-            // Previously registered and honest, do deregistration
-            TCPSender sender = registrySenders.get(requesterSocket);
-            registrySenders.remove(requesterSocket);
-            registeredNodes.remove(fullIdentity);
-            sendDeregisterResponse(sender, true, "Deregistration request successful. The number of remaining messaging nodes is " + String.valueOf(registeredNodes.size()) + ".");
-        }
-        catch (IOException ioe)
-        {
-            System.out.println("Failed to respond to deregister request.");
+                // Previously registered, check whether it is honest
+                if (!(IP.equals(requesterSocket.getInetAddress().getHostAddress()) || (requesterSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && registryServerThread.getHostIP().equals(IP))))
+                {
+                    // Not honest, send failure message
+                    sendDeregisterResponse(registrySenders.get(requesterSocket), false, "Claimed false IP address.");
+                    return;
+                }
+
+                // Previously registered and honest, do deregistration
+                TCPSender sender = registrySenders.get(requesterSocket);
+                registrySenders.remove(requesterSocket);
+                registeredNodes.remove(fullIdentity);
+                sendDeregisterResponse(sender, true, "Deregistration request successful. The number of remaining messaging nodes is " + String.valueOf(registeredNodes.size()) + ".");
+            }
+            catch (IOException ioe)
+            {
+                System.out.println("Failed to respond to deregister request.");
+            }
         }
     }
 
