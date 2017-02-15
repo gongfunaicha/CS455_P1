@@ -129,6 +129,8 @@ public class Registry implements Node {
                 else
                 {
                     try {
+                        // Reset prepared nodes
+                        numPreparedNodes = 0;
                         LinkWeights linkWeights = new LinkWeights(overlayCreator.getNumLinks(), overlayCreator.formattedOverlay());
                         byte[] data = linkWeights.getBytes();
                         // Send data using all tcpSenders
