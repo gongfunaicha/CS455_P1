@@ -458,7 +458,7 @@ public class MessagingNode implements Node {
             // Wait one millisecond before starting next round
             try {
                 TimeUnit.MILLISECONDS.sleep(1);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ie) {
                 System.out.println("Interrupted when waiting to start another round.");
             }
 
