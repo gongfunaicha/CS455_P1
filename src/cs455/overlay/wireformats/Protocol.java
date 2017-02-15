@@ -16,7 +16,8 @@ public enum Protocol {
     MESSAGE(10),
     TASK_COMPLETE(11),
     PULL_TRAFFIC_SUMMARY(12),
-    TRAFFIC_SUMMARY(13);
+    TRAFFIC_SUMMARY(13),
+    CONNECTION_DROPPED(14);
 
     private int value;
     private static HashMap<Integer, Protocol> map = new HashMap<>();

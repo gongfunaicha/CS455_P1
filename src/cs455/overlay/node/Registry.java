@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -253,6 +254,9 @@ public class Registry implements Node {
             case TRAFFIC_SUMMARY:
                 handleTrafficSummary(e);
                 break;
+            case CONNECTION_DROPPED:
+                handleConnectionDropped(e);
+                break;
             default:
                 System.out.println("Invalid event received.");
         }
@@ -492,5 +496,39 @@ public class Registry implements Node {
     {
         TrafficSummary trafficSummary = (TrafficSummary)e;
         statisticsCollectorAndDisplay.addTrafficSummary(trafficSummary);
+    }
+
+    private void handleConnectionDropped(Event e)
+    {
+        ConnectionDropped connectionDropped = (ConnectionDropped)e;
+        Socket socket = connectionDropped.getSocket();
+        synchronized (registerDeregisterLock)
+        {
+            if (registrySenders.containsKey(socket))
+            {
+                TCPSender sender = registrySenders.get(socket);
+                registrySenders.remove(socket);
+                String key = null;
+                // Go through registeredNodes and get key
+                for (Map.Entry<String, TCPSender> entry: registeredNodes.entrySet())
+                {
+                    if (entry.getValue().equals(sender))
+                    {
+                        key = entry.getKey();
+                        break;
+                    }
+                }
+                if (key != null)
+                {
+                    registeredNodes.remove(key);
+                }
+                System.out.println("Just lost connection to " + key);
+                if (overlayCreator != null)
+                {
+                    System.out.println("Overlay was reset due to the lost of connection of a messaging node.");
+                    overlayCreator = null;
+                }
+            }
+        }
     }
 }

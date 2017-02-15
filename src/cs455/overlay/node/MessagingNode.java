@@ -61,6 +61,8 @@ public class MessagingNode implements Node {
             case PULL_TRAFFIC_SUMMARY:
                 handlePullTrafficSummary(e);
                 break;
+            case CONNECTION_DROPPED:
+                break;
             default:
                 System.out.println("Invalid event received.");
         }

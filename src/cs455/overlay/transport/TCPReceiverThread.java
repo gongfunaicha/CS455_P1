@@ -1,6 +1,7 @@
 package cs455.overlay.transport;
 
 import cs455.overlay.node.Node;
+import cs455.overlay.wireformats.ConnectionDropped;
 import cs455.overlay.wireformats.Event;
 import cs455.overlay.wireformats.EventFactory;
 
@@ -36,6 +37,7 @@ public class TCPReceiverThread extends Thread{
                 break;
             } catch (IOException ioe) {
 //                System.out.println(ioe.getMessage());
+                node.onEvent(new ConnectionDropped(socket));
                 break;
             }
 
