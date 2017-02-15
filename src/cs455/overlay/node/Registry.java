@@ -179,6 +179,7 @@ public class Registry implements Node {
                     {
                         sender.sendData(data);
                     }
+                    System.out.println("Task initiate command sent successfully.");
                 }
                 catch (IOException ioe)
                 {

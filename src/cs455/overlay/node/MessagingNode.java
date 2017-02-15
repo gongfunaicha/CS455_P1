@@ -70,10 +70,10 @@ public class MessagingNode implements Node {
     {
         // Check arguments, exit on fail
         checkArguments(args);
+    }
 
-        // Start messaging node server thread
-        startMessagingNodeServerThread();
-
+    public void connectAndHandleUserInput()
+    {
         // Connect registry
         connectRegistry();
 
@@ -130,7 +130,6 @@ public class MessagingNode implements Node {
                 System.out.println("Unrecognized command.");
             }
         }
-
     }
 
     public static void main(String[] args)
@@ -146,6 +145,10 @@ public class MessagingNode implements Node {
 
         // Right number of arguments, create instance of Messaging Node
         MessagingNode msgnode = new MessagingNode(args);
+        // Handle start thread separately to avoid incomplete initialization
+        msgnode.startMessagingNodeServerThread();
+        msgnode.connectAndHandleUserInput();
+
 
 
     }
