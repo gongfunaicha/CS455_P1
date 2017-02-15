@@ -143,7 +143,7 @@ public class NodeAndLink {
         }
 
         // Finished dijkstra, create routing cache instance and return
-        return new RoutingCache(nodeRoute, finalCost, nextHop, node, senders);
+        return new RoutingCache(nodeRoute, finalCost, nextHop, node, senders, currentNode);
     }
 
     private String findNodeWithSmallestCost(HashMap<String, Integer> currentNodeCost)

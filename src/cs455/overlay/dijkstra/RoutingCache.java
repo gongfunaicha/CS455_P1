@@ -13,8 +13,9 @@ public class RoutingCache {
     private HashMap<String, String> nextHop = null;
     private HashMap<String, TCPSender> senders = null;
     private MessagingNode node = null;
+    private String currentNode = null;
 
-    RoutingCache(HashMap<String, String> nodeRoute, HashMap<String, Integer> finalCost, HashMap<String, String> nextHop, MessagingNode node, HashMap<String, TCPSender> senders)
+    RoutingCache(HashMap<String, String> nodeRoute, HashMap<String, Integer> finalCost, HashMap<String, String> nextHop, MessagingNode node, HashMap<String, TCPSender> senders, String currentNode)
     {
         this.nodeRoute = nodeRoute;
         this.finalCost = finalCost;
@@ -22,6 +23,7 @@ public class RoutingCache {
         this.senders = new HashMap<>();
         this.node = node;
         this.senders = senders;
+        this.currentNode = currentNode;
     }
 
     public String getNextHop(String dest)
@@ -39,6 +41,9 @@ public class RoutingCache {
         String shortestPath = "";
         for (String route: this.nodeRoute.values())
         {
+            // Skip self
+            if (currentNode.equals(route))
+                continue;
             if (!shortestPath.equals(""))
             {
                 shortestPath += "\n";
