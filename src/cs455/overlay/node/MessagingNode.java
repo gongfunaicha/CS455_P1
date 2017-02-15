@@ -454,6 +454,14 @@ public class MessagingNode implements Node {
                     System.out.println("Failed to initiate a message to " + dest);
                 }
             }
+
+            // Wait one millisecond before starting next round
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted when waiting to start another round.");
+            }
+
         }
 
         // Finished all rounds, send task complete to registry
