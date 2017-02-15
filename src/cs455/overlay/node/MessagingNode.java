@@ -105,7 +105,7 @@ public class MessagingNode implements Node {
             {
                 if (routingCache == null)
                 {
-                    System.out.println("Dijkstra process has not completed. Cannot print shorest path.");
+                    System.out.println("Dijkstra process has not completed. Cannot print shortest path.");
                 }
                 else
                 {
