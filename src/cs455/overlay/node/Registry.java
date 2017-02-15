@@ -24,8 +24,8 @@ public class Registry implements Node {
     private ArrayList<TCPSender> registeredSendersCache = null;
     private StatisticsCollectorAndDisplay statisticsCollectorAndDisplay = null;
     private final Object registerDeregisterLock = new Object();
-    int numPreparedNodes = 0;
-    int numCompletedNodes = 0;
+    private int numPreparedNodes = 0;
+    private int numCompletedNodes = 0;
 
     public Registry(int portnum)
     {
